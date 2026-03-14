@@ -1,0 +1,68 @@
+# Authenticity Engine — Project Rules
+
+## 프로젝트 개요
+자기 발견을 돕는 앱. 사용자가 관심 콘텐츠를 저장하고, 짧은 리플렉션을 달고, AI가 패턴을 분석해서 "Who You're Becoming" 인사이트를 보여줌.
+
+## Tech Stack (이것만 써)
+- Frontend: React (JavaScript, NOT TypeScript) + Tailwind CSS
+- Backend: Node.js + Express
+- Database: MongoDB + Mongoose
+- AI: OpenAI API (gpt-4o-mini, text-embedding-3-small)
+- URL Parsing: @mozilla/readability or cheerio
+- Package Manager: npm
+
+## 금지사항 (절대 쓰지 마)
+- TypeScript 사용 금지
+- Next.js 사용 금지
+- Supabase, Firebase 사용 금지
+- Redux, Zustand 등 복잡한 상태관리 라이브러리 금지 (React useState/useContext만 사용)
+- Prisma 금지 (Mongoose 사용)
+- GraphQL 금지 (REST API만)
+- Docker 금지
+- 테스트 프레임워크 자동 추가 금지 (Jest, Vitest 등)
+
+## 프로젝트 구조
+```
+authenticity-engine/
+├── client/              # React frontend
+│   ├── src/
+│   │   ├── components/  # 재사용 컴포넌트
+│   │   ├── pages/       # Home, Capture, Reflection, Insight
+│   │   ├── context/     # React Context (전역 상태)
+│   │   ├── utils/       # 헬퍼 함수
+│   │   └── App.jsx
+│   └── tailwind.config.js
+├── server/              # Node.js backend
+│   ├── routes/          # API 라우트
+│   ├── models/          # Mongoose 모델
+│   ├── controllers/     # 비즈니스 로직
+│   ├── services/        # OpenAI API 호출 등
+│   └── server.js
+├── .cursorrules
+└── .env
+```
+
+## 코드 스타일
+- 컴포넌트는 함수형 + Arrow Function
+- 주석은 한국어로 간결하게
+- 파일명: 컴포넌트는 PascalCase (Home.jsx), 유틸은 camelCase (formatDate.js)
+- API 응답은 항상 { success: true/false, data: ..., error: ... } 형식
+- async/await 사용 (콜백, .then() 체인 최소화)
+- console.log 남겨두되, 프로덕션 전에 정리할 것
+
+## 디자인 가이드
+- 모바일 퍼스트 (max-width: 430px 기준)
+- 차분한 톤: 부드러운 그라디언트, 라이트 블루 계열
+- 네비게이션: 하단 탭 바 (Home ◆ / Reflection ● / Insight ▲)
+- Figma 프로토타입을 최대한 따를 것
+
+## AI 관련 규칙
+- OpenAI API 호출은 반드시 server/ 안에서만 (클라이언트에서 직접 호출 금지)
+- API key는 .env에 저장, 절대 하드코딩 금지
+- 모델은 gpt-4o-mini 기본 (비용 절약)
+- Embedding은 text-embedding-3-small 사용
+
+## 내가 배우는 중인 것들 (참고)
+- 이 프로젝트는 학습 목적이 강함
+- 코드 생성 시 핵심 로직에 한국어 주석으로 "왜 이렇게 하는지" 간단히 설명 추가
+- 너무 추상화하지 말 것 — 명시적이고 읽기 쉬운 코드 우선

@@ -1,0 +1,17 @@
+# 환경 변수 (API key 등 비밀 정보)
+.env
+ 
+# Node.js 의존성 (npm install로 다시 설치 가능)
+node_modules/
+ 
+# 빌드 결과물
+dist/
+build/
+ 
+# OS 파일
+.DS_Store
+Thumbs.db
+ 
+# 에디터 설정
+.vscode/
+.idea/
