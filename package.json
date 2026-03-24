@@ -1,0 +1,14 @@
+{
+  "name": "authenticity-engine",
+  "type": "module",
+  "dependencies": {
+    "openai": "^6.29.0",
+    "zod": "^4.3.6"
+  },
+  "scripts": {
+    "dev": "nodemon server/server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

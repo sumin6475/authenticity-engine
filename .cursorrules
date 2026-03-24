@@ -61,6 +61,7 @@ authenticity-engine/
 - API key는 .env에 저장, 절대 하드코딩 금지
 - 모델은 gpt-4o-mini 기본 (비용 절약)
 - Embedding은 text-embedding-3-small 사용
+- OpenAI Structured Output 사용
 
 ## 내가 배우는 중인 것들 (참고)
 - 이 프로젝트는 학습 목적이 강함
