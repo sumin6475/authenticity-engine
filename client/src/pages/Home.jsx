@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const API_BASE = "http://localhost:3001";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
 // 요소가 화면에 들어오면 visible — 스크롤 시 순차 등장 애니메이션용
 function useInView(threshold = 0.15) {
