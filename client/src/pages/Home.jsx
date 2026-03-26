@@ -268,17 +268,47 @@ const Home = () => {
 
   // 서버 캡처 목록 (캐러셀·History 공통 데이터)
   const [captures, setCaptures] = useState([]);
+  const [capturesLoading, setCapturesLoading] = useState(true);
+  const [capturesError, setCapturesError] = useState(null);
+
+  // 마운트 시 한 번만 GET — 배포 URL은 VITE_API_BASE (없으면 localhost)
   useEffect(() => {
+    let cancelled = false;
+    setCapturesLoading(true);
+    setCapturesError(null);
+
     fetch(`${API_BASE}/api/captures`)
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(
+            data?.error || `서버 응답 ${res.status} (${res.statusText})`,
+          );
+        }
+        return data;
+      })
       .then((data) => {
-        if (data.success) {
+        if (cancelled) return;
+        if (data.success && Array.isArray(data.data)) {
           setCaptures(data.data);
+        } else {
+          setCaptures([]);
+          setCapturesError(data?.error || "목록 형식이 올바르지 않습니다.");
         }
       })
       .catch((err) => {
-        console.error("Error fetching captures:", err);
+        if (cancelled) return;
+        console.error("GET /api/captures:", API_BASE, err);
+        setCaptures([]);
+        setCapturesError(err.message || "목록을 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (!cancelled) setCapturesLoading(false);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -317,7 +347,11 @@ const Home = () => {
                 Recently Saved
               </h1>
               <span className="text-sm text-gray-400">
-                {captures.length} Items
+                {capturesLoading
+                  ? "불러오는 중…"
+                  : capturesError
+                    ? "불러오기 실패"
+                    : `${captures.length} Items`}
               </span>
             </div>
             <button
@@ -345,6 +379,15 @@ const Home = () => {
           className="flex-1 overflow-y-auto px-5 pb-4 relative"
           style={{ scrollBehavior: "smooth" }}
         >
+          {capturesError && (
+            <p
+              className="text-sm text-red-600 bg-red-50 rounded-xl px-3 py-2 mt-2 mb-1"
+              role="alert"
+            >
+              {capturesError}
+            </p>
+          )}
+
           {/* 최신 4개만 캐러셀 */}
           <FadeIn delay={0.2}>
             <div className="mt-3">
@@ -360,7 +403,11 @@ const Home = () => {
                   History
                 </h2>
                 <span className="text-xs text-gray-400">
-                  {captures.length}Items
+                  {capturesLoading
+                    ? "…"
+                    : capturesError
+                      ? "—"
+                      : `${captures.length} Items`}
                 </span>
               </div>
               <div className="flex gap-1.5">
