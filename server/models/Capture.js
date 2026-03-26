@@ -11,6 +11,9 @@ const captureSchema = new mongoose.Schema({
     // 타입: idea(직접 입력) | link(URL에서 가져온 캡처)
     type: { type: String, enum: ["idea", "link"], default: "idea" },
 
+    url: { type: String, default: ""},
+    note: { type: String, default: ""},
+
     // AI가 생성한 태그들 
     tags : [String],
 

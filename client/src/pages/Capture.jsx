@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-const API_BASE = "http://localhost:3001";
+import { API_BASE } from "../utils/apiBase.js";
 
 /**
  * Capture: "I thought about..." — Idea / URL 모드, 파싱·저장 API 연동

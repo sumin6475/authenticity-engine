@@ -8,8 +8,13 @@ import parseRouter from "./routes/parse.js";
 
 const app = express();
 
-// 미들웨어 설정
-app.use(cors());//프론트엔드 요청 허용
+// 미들웨어 설정 — Vercel 등 외부 오리진에서 오는 요청 허용 (프리플라이트 포함)
+app.use(
+  cors({
+    origin: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  }),
+);
 app.use(express.json()); //JSON 형식으로 데이터 전송 허용
 app.use("/api/parse", parseRouter);
 
