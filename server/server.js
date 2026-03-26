@@ -18,20 +18,40 @@ app.use(
 app.use(express.json()); //JSON 형식으로 데이터 전송 허용
 app.use("/api/parse", parseRouter);
 
-//MongoDB 연결
-mongoose.connect(process.env.MONGODB_URI)
-.then(()=> console.log("Successfully connected to MongoDB"))
-.catch((err)=> console.error("MongoDB connection error", err));
-
-
 app.get("/", (req, res) => {
-    res.send({message : "This is Authenticity Engine Server"});
+  res.send({ message: "This is Authenticity Engine Server" });
 });
 
 app.use("/api/captures", capturesRouter);
 
-// 서버 시작
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+
+// DB 붙기 전에 listen 하면 find()가 버퍼링됐다가 10초 타임아웃 날 수 있음 → 연결 성공 후에만 HTTP 열기
+async function start() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri || !String(uri).trim()) {
+    console.error(
+      "[FATAL] MONGODB_URI 가 비어 있습니다. Railway Variables 에 동일한 이름으로 Atlas 연결 문자열을 넣으세요.",
+    );
+    process.exit(1);
+  }
+
+  try {
+    await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 15_000,
+    });
+    console.log("Successfully connected to MongoDB");
+  } catch (err) {
+    console.error("MongoDB connection failed:", err.message);
+    console.error(
+      "→ Atlas Network Access 에 0.0.0.0/0 허용, 사용자/비밀번호·클러스터 호스트가 URI 와 일치하는지 확인하세요.",
+    );
+    process.exit(1);
+  }
+
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is running on port ${PORT}`);
-});
+  });
+}
+
+start();
