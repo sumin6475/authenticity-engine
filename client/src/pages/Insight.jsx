@@ -333,7 +333,7 @@ const Insight = () => {
     const fetchTags = async () => {
       try {
         const response = await fetch(
-          `${API_BASE}/api/insights/tags`,
+          `${API_BASE}/api/insights/tag-frequency`,
         );
         const data = await response.json();
         if (data.success) setTagData(data.data);

@@ -274,6 +274,8 @@ const Reflection = () => {
   // Today's Prompt 입력 상태
   const [promptText, setPromptText] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
+  // 서버에서 받아온 Daily Prompt 질문
+  const [dailyPrompt, setDailyPrompt] = useState("");
   // 서버에서 받아온 Memories 목록
   const [memories, setMemories] = useState([]);
 
@@ -281,6 +283,20 @@ const Reflection = () => {
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(t);
+  }, []);
+
+  // 마운트 시 Daily Prompt API 호출
+  useEffect(() => {
+    const fetchPrompt = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/insights/daily-prompt`);
+        const data = await res.json();
+        if (data.success) setDailyPrompt(data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPrompt();
   }, []);
 
   // 마운트 시 Memories API 호출
@@ -386,7 +402,7 @@ const Reflection = () => {
                 </svg>
               </div>
               <p className="text-base font-medium text-gray-800 leading-snug mb-3">
-                What would &quot;good enough&quot; look like today?
+                {dailyPrompt || "What would you like to reflect on today?"}
               </p>
               <div
                 className="rounded-xl overflow-hidden"
