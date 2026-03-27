@@ -25,6 +25,13 @@ const captureSchema = new mongoose.Schema({
 
     // 저장 날짜 (자동 생성)
     createdAt : { type: Date, default: Date.now},
+
+    //임베딩
+    embedding: {
+        type : [Number],
+        default : [],
+        index: false,
+    }
 })
 
 export default mongoose.model("Capture", captureSchema);

@@ -3,6 +3,7 @@ import express from "express";
 import Capture from "../models/Capture.js";
 import fetchArticle from "../services/fetchArticle.js";
 import { analyzeCaptureText } from "../services/analyzeCaptureText.js";
+import { generateEmbedding } from "../services/embedding.js";
 
 const router = express.Router();
 
@@ -10,10 +11,39 @@ const router = express.Router();
 router.get("/", async (req, res) => {
     try {
     //최신순으로 정렬해서 가져오기
-    const captures = await Capture.find().sort({ createdAt: -1 });
-    res.json({ success: true, data: captures});
+    // lean() → 순수 객체로 직렬화(프론트·프록시에서 이슈 줄임)
+    const captures = await Capture.find().sort({ createdAt: -1 }).lean();
+    res.json({ success: true, data: captures });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message});
+    }
+});
+
+router.get("/similar/:id", async (req, res) => {
+    try{
+        const capture = await Capture.findById(req.params.id);
+        if(!capture || !capture.embedding.length){
+            return res.status(404).json({success: false, error: "No embedding found"});
+        }
+        const results = await Capture.aggregate([
+            {$vectorSearch :{
+                index: "vector_index",
+                path: "embedding",
+                queryVector: capture.embedding,
+                numCandidates: 50,
+                limit: 5,
+            }
+        },{
+            $match:{_id: {$ne: capture._id}}
+        },{
+            $project:{
+                title: 1, content: 1, tags: 1, category: 1, summary:1, createdAt: 1, score:{$meta: "vectorSearchScore"}
+            }
+        }
+        ]);
+        res.json({success: true, data: results});
+    }catch(error){
+        res.status(500).json({success: false, error: error.message});
     }
 });
 
@@ -35,6 +65,9 @@ router.post("/", async (req, res) => {
             category = aiResult.category;
             summary = aiResult.summary;
         }
+        const textForEmbedding = `${title} ${content}`;
+        const embedding = await generateEmbedding(textForEmbedding);
+
         const capture = await Capture.create({
             title,
             content,
@@ -42,6 +75,7 @@ router.post("/", async (req, res) => {
             tags,
             category,
             summary,
+            embedding,
         });
 
         res.status(201).json({ success: true, data: capture});
