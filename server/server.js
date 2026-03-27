@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import capturesRouter from "./routes/captures.js";
 import parseRouter from "./routes/parse.js";
+import insightsRouter from "./routes/insights.js";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/captures", capturesRouter);
+app.use("/api/insights", insightsRouter);
 
 const PORT = process.env.PORT || 5000;
 
