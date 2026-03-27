@@ -7,8 +7,16 @@ import { API_BASE } from "../utils/apiBase.js";
 
 // 태그 바 색상 팔레트 (순서대로 순환)
 const TAG_BAR_COLORS = [
-  "#60a5fa", "#34d399", "#fbbf24", "#f472b6", "#a78bfa",
-  "#67e8f9", "#fb7185", "#fcd34d", "#4ade80", "#c084fc",
+  "#97B3AE",
+  "#D2E0D3",
+  "#F0DDD6",
+  "#F2C3B9",
+  "#D6CBBF",
+  "#B8C5C1",
+  "#E5D4CB",
+  "#7A9A94",
+  "#E0C4BB",
+  "#BFB0A2",
 ];
 
 // "Who You're Becoming" 카드 배경 그라디언트 (순서대로 적용)
@@ -241,9 +249,7 @@ function PatternSection({ analysis, analysisLoading }) {
     <FadeIn delay={0.4}>
       <div className="mb-7">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-base font-semibold text-gray-900 m-0">
-            Pattern
-          </h3>
+          <h3 className="text-base font-semibold text-gray-900 m-0">Pattern</h3>
           {analysis && !analysisLoading && (
             <button
               type="button"
@@ -334,9 +340,7 @@ const Insight = () => {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE}/api/insights/tag-frequency`,
-        );
+        const response = await fetch(`${API_BASE}/api/insights/tag-frequency`);
         const data = await response.json();
         if (data.success) setTagData(data.data);
       } catch (error) {
@@ -350,9 +354,7 @@ const Insight = () => {
   useEffect(() => {
     const fetchMemories = async () => {
       try {
-        const response = await fetch(
-          `${API_BASE}/api/insights/memories`,
-        );
+        const response = await fetch(`${API_BASE}/api/insights/memories`);
         const data = await response.json();
         if (data.success) setMemoriesData(data.data);
       } catch (error) {
@@ -363,9 +365,8 @@ const Insight = () => {
   }, []);
 
   // tagData에서 최대 count (바 너비 계산용)
-  const maxTagCount = tagData.length > 0
-    ? Math.max(...tagData.map((t) => t.count))
-    : 0;
+  const maxTagCount =
+    tagData.length > 0 ? Math.max(...tagData.map((t) => t.count)) : 0;
 
   return (
     <div
@@ -444,7 +445,9 @@ const Insight = () => {
                   <IdentityCard
                     key={i}
                     emoji="✨"
-                    subtitle={analysisLoading ? "Analyzing..." : "Save more captures"}
+                    subtitle={
+                      analysisLoading ? "Analyzing..." : "Save more captures"
+                    }
                     title="?"
                     gradient="bg-gradient-to-br from-gray-200 to-gray-300"
                     delay={0.25 + i * 0.1}
