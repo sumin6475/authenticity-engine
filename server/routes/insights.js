@@ -2,6 +2,8 @@ import express from "express";
 import Capture from "../models/Capture.js";
 import { AE_SYSTEM_PROMPT } from "../services/prompts.js";
 import OpenAI from "openai";
+import { z } from "zod/v4";
+import { zodTextFormat } from "openai/helpers/zod";
 
 const router = express.Router();
 
@@ -14,10 +16,21 @@ function getOpenAI() {
   return openaiClient;
 }
 
+// Structured Output 스키마
+const BecomingSchema = z.object({
+  analysis: z.string(),
+  identities: z.array(
+    z.object({
+      keyword: z.string(),
+      description: z.string(),
+      emoji: z.string(),
+    }),
+  ),
+});
+
 //Who You're Becoming Insight
 router.get("/who-youre-becoming", async (req, res) => {
   try {
-    //1. 최근 캡쳐 가져오기 (최대 20개)
     const recentCaptures = await Capture.find()
       .sort({ createdAt: -1 })
       .limit(20)
@@ -33,7 +46,6 @@ router.get("/who-youre-becoming", async (req, res) => {
       });
     }
 
-    //2. 캡쳐들을 context 문자열로 조합
     const context = recentCaptures
       .map(
         (c, i) =>
@@ -41,18 +53,22 @@ router.get("/who-youre-becoming", async (req, res) => {
       )
       .join("\n");
 
-    //3. RAG: context + System Prompt → Responses API
-    const response = await getOpenAI().responses.create({
+    const response = await getOpenAI().responses.parse({
       model: "gpt-4o-mini",
-      instructions: AE_SYSTEM_PROMPT,
+      instructions: `${AE_SYSTEM_PROMPT}\n\nAlso generate exactly 2 identity keywords that capture this person's emerging type.\nkeyword: one evocative word (Architect, Dreamer, Connector, etc.)\ndescription: under 5 words explaining why\nemoji: one emoji that represents it`,
       input: `Here are this person's recent captures:\n\n${context}\n\nBased on these, describe the patterns you notice in what they're drawn to. What themes are emerging? What might they be becoming?`,
-      max_output_tokens: 600,
+      text: {
+        format: zodTextFormat(BecomingSchema, "becoming"),
+      },
     });
+
+    const parsed = response.output_parsed;
 
     res.json({
       success: true,
       data: {
-        analysis: response.output_text,
+        analysis: parsed.analysis,
+        identities: parsed.identities,
         captureCount: recentCaptures.length,
       },
     });

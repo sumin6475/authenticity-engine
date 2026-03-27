@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { becomingCards } from "../utils/dummyData";
 import { API_BASE } from "../utils/apiBase.js";
 
 /* ──────────────────────────────────────
@@ -12,17 +11,13 @@ const TAG_BAR_COLORS = [
   "#67e8f9", "#fb7185", "#fcd34d", "#4ade80", "#c084fc",
 ];
 
-// "Who You're Becoming" 카드의 이모지·배경색 매핑
-const BECOMING_META = {
-  Architect: {
-    emoji: "🧩",
-    gradient: "bg-gradient-to-br from-emerald-300 to-emerald-500",
-  },
-  Overthinker: {
-    emoji: "🧠",
-    gradient: "bg-gradient-to-br from-gray-400 to-gray-600",
-  },
-};
+// "Who You're Becoming" 카드 배경 그라디언트 (순서대로 적용)
+const IDENTITY_GRADIENTS = [
+  "bg-gradient-to-br from-emerald-300 to-emerald-500",
+  "bg-gradient-to-br from-violet-300 to-violet-500",
+  "bg-gradient-to-br from-sky-300 to-blue-500",
+  "bg-gradient-to-br from-amber-300 to-orange-500",
+];
 
 /* ──────────────────────────────────────
    공용 UI 컴포넌트 (화면 여러 곳에서 재사용)
@@ -296,8 +291,9 @@ const Insight = () => {
   const [mounted, setMounted] = useState(false);
   const scrollRef = useRef(null);
 
-  // 서버에서 받아온 AI 패턴 분석 텍스트
+  // 서버에서 받아온 AI 패턴 분석 텍스트 + identity 카드
   const [analysis, setAnalysis] = useState(null);
+  const [identities, setIdentities] = useState([]);
   const [analysisLoading, setAnalysisLoading] = useState(false);
 
   // 서버에서 받아온 태그 집계 (Topic 섹션)
@@ -321,7 +317,10 @@ const Insight = () => {
           `${API_BASE}/api/insights/who-youre-becoming`,
         );
         const data = await response.json();
-        if (data.success) setAnalysis(data.data.analysis);
+        if (data.success) {
+          setAnalysis(data.data.analysis);
+          if (data.data.identities) setIdentities(data.data.identities);
+        }
       } catch (error) {
         console.error("Error fetching analysis:", error);
       }
@@ -430,22 +429,27 @@ const Insight = () => {
             </h2>
           </FadeIn>
           <div className="flex gap-3 mb-5">
-            {becomingCards.map((card, i) => {
-              const meta = BECOMING_META[card.title] || {
-                emoji: "✨",
-                gradient: "bg-gradient-to-br from-sky-300 to-blue-500",
-              };
-              return (
-                <IdentityCard
-                  key={card.id}
-                  emoji={meta.emoji}
-                  subtitle={card.phrase}
-                  title={card.title}
-                  gradient={meta.gradient}
-                  delay={0.25 + i * 0.1}
-                />
-              );
-            })}
+            {identities.length > 0
+              ? identities.map((id, i) => (
+                  <IdentityCard
+                    key={id.keyword}
+                    emoji={id.emoji}
+                    subtitle={id.description}
+                    title={id.keyword}
+                    gradient={IDENTITY_GRADIENTS[i % IDENTITY_GRADIENTS.length]}
+                    delay={0.25 + i * 0.1}
+                  />
+                ))
+              : [0, 1].map((i) => (
+                  <IdentityCard
+                    key={i}
+                    emoji="✨"
+                    subtitle={analysisLoading ? "Analyzing..." : "Save more captures"}
+                    title="?"
+                    gradient="bg-gradient-to-br from-gray-200 to-gray-300"
+                    delay={0.25 + i * 0.1}
+                  />
+                ))}
           </div>
 
           {/* ③ Pattern 섹션: AI 분석 인용문 (3줄 접힘) */}
