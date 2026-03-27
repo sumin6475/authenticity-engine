@@ -156,19 +156,22 @@ function TagBar({ tag, count, maxCount, colorIdx, delay }) {
       }}
     >
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white text-xs font-medium shrink-0"
+        className="relative flex items-center px-2.5 py-1.5 rounded-lg text-white text-xs font-medium"
         style={{
           width: `${pct}%`,
           minWidth: 72,
+          maxWidth: "85%",
+          height: 32,
           background: color,
           transform: hovered ? "scaleX(1.03)" : "scaleX(1)",
           transformOrigin: "left center",
           transition: "transform 0.2s ease",
         }}
+        title={tag}
       >
-        <span># {tag}</span>
+        <span className="truncate"># {tag}</span>
       </div>
-      <span className="text-xs text-gray-400 whitespace-nowrap">
+      <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">
         {count}
       </span>
     </div>
