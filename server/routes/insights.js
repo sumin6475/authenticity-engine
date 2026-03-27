@@ -14,6 +14,7 @@ function getOpenAI() {
   return openaiClient;
 }
 
+//Who You're Becoming Insight
 router.get("/who-youre-becoming", async (req, res) => {
   try {
     //1. 최근 캡쳐 가져오기 (최대 20개)
@@ -58,6 +59,51 @@ router.get("/who-youre-becoming", async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+//Daily Insight
+router.get("/daily-prompt", async(req,res)=>{
+    try{
+        const response = await getOpenAI().responses.create({
+            model: "gpt-4o-mini",
+            instructions:  "Generate one short, thought-provoking reflection question. No quotes, no attribution. Just the question. Keep it under 15 words.",
+            input: `Today is ${new Date().toLocaleDateString("en-US", {weekday: "long", month: "long", day: "numeric"})}. Generate a reflection prompt.`,
+            max_output_tokens: 50,
+        });
+        res.json({success: true, data: response.output_text});
+    }catch(error){
+        res.status(500).json({success: false, error: error.message});
+    }
+});
+
+//Memories
+router.get("/memories", async(req,res)=> {
+    try{
+        //7일 이상된 캡쳐 중 랜덤 3개
+        const onWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const memories = await Capture.aggregate([
+            { $match: {createdAt: {$lt: onWeekAgo}}},
+            { $sample: {size: 3}},
+            { $project: {title: 1, summary:1, tags: 1, createdAt: 1}}
+        ]);
+        res.json({success: true, data: memories})
+    }catch(error){
+        res.status(500).json({success: false, error: error.message});
+    }
+});
+
+//Tag Frequency
+router.get("/tag-frequency", async(req,res)=> {
+    try{
+        const result = await Capture.aggregate([
+            {$unwind: "$tags"},
+            {$group: {_id: "$tags", count: {$sum: 1}}},
+            {$sort: {count: -1}},
+            {$limit: 10}]);
+            res.json({success: true, data: result});
+    }catch(error){
+        res.status(500).json({success: false, error: error.message});
+    }
 });
 
 export default router;

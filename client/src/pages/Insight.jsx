@@ -1,55 +1,53 @@
-import { useState, useEffect, useRef } from 'react';
-import {
-  becomingCards,
-  patternQuote,
-  insightStats,
-} from '../utils/dummyData';
+import { useState, useEffect, useRef } from "react";
+import { becomingCards } from "../utils/dummyData";
+import { API_BASE } from "../utils/apiBase.js";
 
-/** Topic 범례 + 그리드 색 (디자인 스펙) */
-const TOPICS = [
-  { name: 'Productivity', color: 'bg-blue-400', hex: '#60a5fa' },
-  { name: 'Note', color: 'bg-cyan-300', hex: '#67e8f9' },
-  { name: 'Application', color: 'bg-rose-400', hex: '#fb7185' },
-  { name: 'AI', color: 'bg-amber-300', hex: '#fcd34d' },
-  { name: 'Car', color: 'bg-emerald-400', hex: '#34d399' },
+/* ──────────────────────────────────────
+   설정값 / 상수
+   ────────────────────────────────────── */
+
+// 태그 바 색상 팔레트 (순서대로 순환)
+const TAG_BAR_COLORS = [
+  "#60a5fa", "#34d399", "#fbbf24", "#f472b6", "#a78bfa",
+  "#67e8f9", "#fb7185", "#fcd34d", "#4ade80", "#c084fc",
 ];
 
-const TOPIC_GRID = [
-  [0, 0, 1, 1, -1, -1, -1],
-  [0, 1, 0, 3, 3, 0, 0],
-  [3, 0, 0, 3, 0, 0, 0],
-  [3, 3, 0, 1, 0, 0, 2],
-  [2, 0, 0, 0, 0, 0, 0],
-];
-
-/** 카드별 이모지·그라디언트 (dummyData title 기준) */
+// "Who You're Becoming" 카드의 이모지·배경색 매핑
 const BECOMING_META = {
   Architect: {
-    emoji: '🧩',
-    gradient: 'bg-gradient-to-br from-emerald-300 to-emerald-500',
+    emoji: "🧩",
+    gradient: "bg-gradient-to-br from-emerald-300 to-emerald-500",
   },
   Overthinker: {
-    emoji: '🧠',
-    gradient: 'bg-gradient-to-br from-gray-400 to-gray-600',
+    emoji: "🧠",
+    gradient: "bg-gradient-to-br from-gray-400 to-gray-600",
   },
 };
 
+/* ──────────────────────────────────────
+   공용 UI 컴포넌트 (화면 여러 곳에서 재사용)
+   ────────────────────────────────────── */
+
+// 스크롤해서 보일 때 페이드 인 애니메이션 트리거
 function useInView(threshold = 0.2) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) setVisible(true);
-    }, { threshold });
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setVisible(true);
+      },
+      { threshold },
+    );
     obs.observe(el);
     return () => obs.disconnect();
   }, [threshold]);
   return [ref, visible];
 }
 
-function FadeIn({ children, delay = 0, className = '' }) {
+function FadeIn({ children, delay = 0, className = "" }) {
   const [ref, visible] = useInView(0.15);
   return (
     <div
@@ -57,7 +55,7 @@ function FadeIn({ children, delay = 0, className = '' }) {
       className={className}
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(20px)',
+        transform: visible ? "translateY(0)" : "translateY(20px)",
         transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
       }}
     >
@@ -66,6 +64,7 @@ function FadeIn({ children, delay = 0, className = '' }) {
   );
 }
 
+// Topic·Reflection 숫자 옆 파란 화살표 아이콘
 function UpArrow() {
   return (
     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-300 to-blue-500 flex items-center justify-center shrink-0">
@@ -82,6 +81,11 @@ function UpArrow() {
   );
 }
 
+/* ──────────────────────────────────────
+   화면별 섹션 컴포넌트
+   ────────────────────────────────────── */
+
+// 🟩 "Who You're Becoming" 카드 한 장 (이모지 + 제목, 그라디언트 배경)
 function IdentityCard({ emoji, subtitle, title, gradient, delay }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -91,34 +95,40 @@ function IdentityCard({ emoji, subtitle, title, gradient, delay }) {
         onMouseLeave={() => setHovered(false)}
         className={`relative rounded-2xl p-5 pb-4 flex flex-col justify-between min-h-[180px] cursor-pointer overflow-hidden ${gradient}`}
         style={{
-          transform: hovered ? 'translateY(-4px) scale(1.02)' : 'translateY(0) scale(1)',
-          transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: hovered
+            ? "translateY(-4px) scale(1.02)"
+            : "translateY(0) scale(1)",
+          transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           boxShadow: hovered
-            ? '0 12px 32px rgba(0,0,0,0.15)'
-            : '0 4px 16px rgba(0,0,0,0.08)',
+            ? "0 12px 32px rgba(0,0,0,0.15)"
+            : "0 4px 16px rgba(0,0,0,0.08)",
         }}
       >
         <div
           className="text-5xl leading-none"
           style={{
-            transform: hovered ? 'scale(1.15) rotate(-5deg)' : 'scale(1) rotate(0deg)',
-            transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            transformOrigin: 'center center',
+            transform: hovered
+              ? "scale(1.15) rotate(-5deg)"
+              : "scale(1) rotate(0deg)",
+            transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            transformOrigin: "center center",
           }}
         >
           {emoji}
         </div>
         <div className="mt-auto">
           <div className="text-xs text-white/70 mb-0.5">{subtitle}</div>
-          <div className="text-xl font-bold text-white tracking-tight">{title}</div>
+          <div className="text-xl font-bold text-white tracking-tight">
+            {title}
+          </div>
         </div>
         <div
           className="absolute inset-0 rounded-2xl pointer-events-none"
           style={{
             background: hovered
-              ? 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%)'
-              : 'none',
-            transition: 'background 0.3s ease',
+              ? "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%)"
+              : "none",
+            transition: "background 0.3s ease",
           }}
         />
       </div>
@@ -126,32 +136,12 @@ function IdentityCard({ emoji, subtitle, title, gradient, delay }) {
   );
 }
 
-function TopicDot({ colorIdx, size, delay }) {
-  const [ref, visible] = useInView(0.1);
-  const colors = ['#60a5fa', '#67e8f9', '#fb7185', '#fcd34d', '#34d399'];
-  const sizes = { sm: 'w-5 h-5', md: 'w-6 h-6', lg: 'w-7 h-7' };
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      ref={ref}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={`${sizes[size]} rounded-full cursor-pointer`}
-      style={{
-        backgroundColor: colors[colorIdx],
-        opacity: visible ? (hovered ? 1 : 0.82) : 0,
-        transform: visible ? (hovered ? 'scale(1.3)' : 'scale(1)') : 'scale(0)',
-        transition: `opacity 0.4s ease ${delay}s, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) ${visible ? 0 : delay}s`,
-      }}
-    />
-  );
-}
-
-function ReflectionBar({ rank, label, words, pct, delay }) {
+// 🏷️ Tag 빈도 바 한 줄 (tagData 기반)
+function TagBar({ tag, count, maxCount, colorIdx, delay }) {
   const [ref, visible] = useInView(0.1);
   const [hovered, setHovered] = useState(false);
-  const barWidth = Math.max(pct * 1.4, 12);
+  const pct = maxCount > 0 ? Math.max((count / maxCount) * 100, 15) : 15;
+  const color = TAG_BAR_COLORS[colorIdx % TAG_BAR_COLORS.length];
 
   return (
     <div
@@ -161,59 +151,226 @@ function ReflectionBar({ rank, label, words, pct, delay }) {
       className="flex items-center gap-2 mb-2 cursor-default"
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? 'translateX(0)' : 'translateX(-20px)',
+        transform: visible ? "translateX(0)" : "translateX(-20px)",
         transition: `opacity 0.5s ease ${delay}s, transform 0.5s ease ${delay}s`,
       }}
     >
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-white text-xs font-medium shrink-0"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white text-xs font-medium shrink-0"
         style={{
-          width: `${barWidth}%`,
+          width: `${pct}%`,
           minWidth: 72,
-          background: hovered
-            ? 'linear-gradient(90deg, #f43f5e 0%, #e11d48 100%)'
-            : 'linear-gradient(90deg, #fb7185 0%, #f43f5e 100%)',
-          transform: hovered ? 'scaleX(1.03)' : 'scaleX(1)',
-          transformOrigin: 'left center',
-          transition: 'background 0.2s ease, transform 0.2s ease',
+          background: color,
+          transform: hovered ? "scaleX(1.03)" : "scaleX(1)",
+          transformOrigin: "left center",
+          transition: "transform 0.2s ease",
         }}
       >
-        <span className="opacity-60">{rank}</span>
-        <span className="opacity-40 text-[6px]">●</span>
-        <span>{label}</span>
+        <span># {tag}</span>
       </div>
       <span className="text-xs text-gray-400 whitespace-nowrap">
-        {words} words · {pct}%
+        {count}
       </span>
     </div>
   );
 }
 
-/**
- * Insight: Who You&apos;re Becoming, Pattern, 월별 Topic/Reflection
- * Layout 하단 네비 사용 — 프로토타입의 TabBar/폰 크롬은 제외
- */
+// 📋 Memories 캡처 카드 한 장 (Insight·Reflection 공용)
+function MemoryCaptureCard({ title, summary, tags, createdAt, delay }) {
+  const [hovered, setHovered] = useState(false);
+  const dateStr = createdAt
+    ? new Date(createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : "";
+
+  return (
+    <FadeIn delay={delay}>
+      <article
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className="border border-gray-100 rounded-xl p-4 mb-3 cursor-pointer"
+        style={{
+          background: hovered ? "#f9fafb" : "#fff",
+          transform: hovered ? "translateY(-2px)" : "translateY(0)",
+          transition: "all 0.25s ease",
+          boxShadow: hovered
+            ? "0 6px 20px rgba(0,0,0,0.06)"
+            : "0 1px 4px rgba(0,0,0,0.03)",
+        }}
+      >
+        <div className="flex justify-between items-start mb-1.5">
+          <h4 className="text-sm font-bold text-gray-900 leading-snug m-0 line-clamp-1 flex-1">
+            {title}
+          </h4>
+          {dateStr && (
+            <span className="text-[11px] text-gray-400 shrink-0 ml-2">
+              {dateStr}
+            </span>
+          )}
+        </div>
+        {summary && (
+          <p className="text-xs text-gray-500 leading-relaxed m-0 mb-2 line-clamp-2">
+            {summary}
+          </p>
+        )}
+        {tags?.length > 0 && (
+          <div className="flex gap-1.5 flex-wrap">
+            {tags.slice(0, 4).map((t) => (
+              <span
+                key={t}
+                className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
+              >
+                # {t}
+              </span>
+            ))}
+          </div>
+        )}
+      </article>
+    </FadeIn>
+  );
+}
+
+// 💬 Pattern 섹션 — AI 분석 텍스트, 3줄까지만 보이고 Read More로 펼침
+function PatternSection({ analysis, analysisLoading }) {
+  const [expanded, setExpanded] = useState(false);
+  const text = analysisLoading
+    ? "Analyzing your data..."
+    : analysis || "Save more to reveal your pattern...";
+
+  return (
+    <FadeIn delay={0.4}>
+      <div className="mb-7">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-base font-semibold text-gray-900 m-0">
+            Pattern
+          </h3>
+          {analysis && !analysisLoading && (
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              className="text-sm text-blue-500 font-medium cursor-pointer hover:text-blue-600 transition-colors bg-transparent border-none p-0"
+            >
+              {expanded ? "Show Less" : "Read More"}
+            </button>
+          )}
+        </div>
+        <div className="bg-gray-50 rounded-xl px-6 py-5 relative group hover:bg-gray-100 transition-colors">
+          <span
+            className="absolute top-3 left-4 text-3xl text-gray-300 select-none"
+            aria-hidden
+          >
+            &ldquo;
+          </span>
+          <p
+            className={`text-base font-medium text-gray-800 text-center leading-relaxed mx-4 my-1 ${!expanded ? "line-clamp-3" : ""}`}
+          >
+            {text}
+          </p>
+          <span
+            className="absolute bottom-2 right-4 text-3xl text-gray-300 select-none"
+            aria-hidden
+          >
+            &rdquo;
+          </span>
+        </div>
+      </div>
+    </FadeIn>
+  );
+}
+
+/* ──────────────────────────────────────
+   메인 페이지 컴포넌트
+   화면 위→아래 순서:
+     1) 헤더 ("Insight" 타이틀 + 프로필)
+     2) "Who You're Becoming" 카드 2장
+     3) Pattern (AI 분석 인용문)
+     4) 월별 Topic 도트 그리드 + 범례
+     5) Reflection 가로 막대 차트
+   ────────────────────────────────────── */
 const Insight = () => {
   const [mounted, setMounted] = useState(false);
   const scrollRef = useRef(null);
 
+  // 서버에서 받아온 AI 패턴 분석 텍스트
+  const [analysis, setAnalysis] = useState(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+
+  // 서버에서 받아온 태그 집계 (Topic 섹션)
+  const [tagData, setTagData] = useState([]);
+
+  // 서버에서 받아온 과거 캡처 (Memories 섹션)
+  const [memoriesData, setMemoriesData] = useState([]);
+
+  // 페이드 인 트리거
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(t);
   }, []);
 
-  const reflections = insightStats.reflectionBreakdown.map((r, i) => ({
-    rank: i + 1,
-    label: r.label,
-    words: r.words,
-    pct: r.percent,
-  }));
+  // 마운트 시 "Who You're Becoming" 분석 API 호출
+  useEffect(() => {
+    const fetchAnalysis = async () => {
+      setAnalysisLoading(true);
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/insights/who-youre-becoming`,
+        );
+        const data = await response.json();
+        if (data.success) setAnalysis(data.data.analysis);
+      } catch (error) {
+        console.error("Error fetching analysis:", error);
+      }
+
+      setAnalysisLoading(false);
+    };
+    fetchAnalysis();
+  }, []);
+
+  // 마운트 시 태그 집계 API 호출
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/insights/tags`,
+        );
+        const data = await response.json();
+        if (data.success) setTagData(data.data);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+    fetchTags();
+  }, []);
+
+  // 마운트 시 Memories(과거 캡처) API 호출
+  useEffect(() => {
+    const fetchMemories = async () => {
+      try {
+        const response = await fetch(
+          `${API_BASE}/api/insights/memories`,
+        );
+        const data = await response.json();
+        if (data.success) setMemoriesData(data.data);
+      } catch (error) {
+        console.error("Error fetching memories:", error);
+      }
+    };
+    fetchMemories();
+  }, []);
+
+  // tagData에서 최대 count (바 너비 계산용)
+  const maxTagCount = tagData.length > 0
+    ? Math.max(...tagData.map((t) => t.count))
+    : 0;
 
   return (
     <div
       className="min-h-[calc(100dvh-5rem)] px-5 pb-6 max-w-mobile mx-auto flex flex-col"
       style={{
-        background: 'linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 50%, #dbeafe 100%)',
+        background:
+          "linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 50%, #dbeafe 100%)",
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
@@ -227,20 +384,28 @@ const Insight = () => {
         className="relative w-full flex flex-col flex-1 overflow-hidden bg-white rounded-b-3xl shadow-soft"
         style={{
           opacity: mounted ? 1 : 0,
-          transform: mounted ? 'translateY(0)' : 'translateY(16px)',
-          transition: 'opacity 0.8s ease, transform 0.8s ease',
+          transform: mounted ? "translateY(0)" : "translateY(16px)",
+          transition: "opacity 0.8s ease, transform 0.8s ease",
         }}
       >
-        {/* 헤더 */}
+        {/* ① 헤더: "Insight" + 프로필 아이콘 */}
         <FadeIn delay={0.1}>
           <div className="flex justify-between items-center px-5 pt-5 pb-2 shrink-0 border-b border-gray-100/80">
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight m-0">Insight</h1>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight m-0">
+              Insight
+            </h1>
             <button
               type="button"
               className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
               aria-label="Profile"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden
+              >
                 <path
                   d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"
                   fill="#60a5fa"
@@ -253,8 +418,9 @@ const Insight = () => {
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto px-5 pb-4"
-          style={{ scrollBehavior: 'smooth' }}
+          style={{ scrollBehavior: "smooth" }}
         >
+          {/* ② "Who You're Becoming" 섹션 제목 + 카드 2장 */}
           <FadeIn delay={0.2}>
             <h2 className="text-lg font-bold text-gray-900 mb-3 mt-4">
               Who You&apos;re Becoming...
@@ -263,8 +429,8 @@ const Insight = () => {
           <div className="flex gap-3 mb-5">
             {becomingCards.map((card, i) => {
               const meta = BECOMING_META[card.title] || {
-                emoji: '✨',
-                gradient: 'bg-gradient-to-br from-sky-300 to-blue-500',
+                emoji: "✨",
+                gradient: "bg-gradient-to-br from-sky-300 to-blue-500",
               };
               return (
                 <IdentityCard
@@ -279,116 +445,88 @@ const Insight = () => {
             })}
           </div>
 
-          <FadeIn delay={0.4}>
-            <div className="mb-7">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-base font-semibold text-gray-900 m-0">Pattern</h3>
-                <button
-                  type="button"
-                  className="text-sm text-blue-500 font-medium cursor-pointer hover:text-blue-600 transition-colors bg-transparent border-none p-0"
-                >
-                  Read More
-                </button>
-              </div>
-              <div className="bg-gray-50 rounded-xl px-6 py-5 relative group hover:bg-gray-100 transition-colors">
-                <span className="absolute top-3 left-4 text-3xl text-gray-300 select-none" aria-hidden>
-                  &ldquo;
-                </span>
-                <p className="text-base font-medium text-gray-800 text-center leading-relaxed mx-4 my-1">
-                  {patternQuote}
-                </p>
-                <span className="absolute bottom-2 right-4 text-3xl text-gray-300 select-none" aria-hidden>
-                  &rdquo;
-                </span>
-              </div>
-            </div>
-          </FadeIn>
+          {/* ③ Pattern 섹션: AI 분석 인용문 (3줄 접힘) */}
+          <PatternSection
+            analysis={analysis}
+            analysisLoading={analysisLoading}
+          />
 
-          <FadeIn delay={0.15}>
-            <h2 className="text-2xl font-bold text-gray-900 mb-5">
-              {insightStats.month}{' '}
-              <span className="text-gray-300 font-normal">{insightStats.year}</span>
-            </h2>
-          </FadeIn>
+          {/* 통계 구분선 */}
+          <div className="h-px bg-gray-100 mb-4" />
 
+          {/* ④ Topic 섹션: 태그별 빈도 바 리스트 (tagData) */}
           <FadeIn delay={0.2}>
             <div className="mb-7">
               <div className="text-[11px] font-semibold text-gray-400 tracking-widest uppercase mb-1">
                 Topic
               </div>
-              <div className="text-sm text-gray-500 mb-1">You&apos;ve explored</div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="text-sm text-gray-500 mb-1">
+                You&apos;ve explored
+              </div>
+              <div className="flex items-center gap-2 mb-4">
                 <UpArrow />
                 <span className="text-4xl font-bold text-gray-900 leading-none">
-                  {insightStats.topicCount}
+                  {tagData.length}
                 </span>
-                <span className="text-lg text-gray-500">topics</span>
-              </div>
-              <div className="text-xs text-gray-400 mb-4">
-                December: {insightStats.topicPrev} topics
+                <span className="text-lg text-gray-500">tags</span>
               </div>
 
-              <div className="flex gap-5 items-start">
-                <div className="flex flex-col gap-1.5">
-                  {TOPIC_GRID.map((row, ri) => (
-                    <div key={ri} className="flex gap-1.5">
-                      {row.map((val, ci) => {
-                        if (val === -1) return <div key={ci} className="w-7 h-7" />;
-                        const sizeMap = { 0: 'lg', 1: 'md', 2: 'lg', 3: 'md', 4: 'sm' };
-                        return (
-                          <TopicDot
-                            key={ci}
-                            colorIdx={val}
-                            size={sizeMap[val] || 'md'}
-                            delay={0.3 + ri * 0.06 + ci * 0.03}
-                          />
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex flex-col gap-2 pt-1">
-                  {TOPICS.map((t, i) => (
-                    <FadeIn key={t.name} delay={0.5 + i * 0.06}>
-                      <div className="flex items-center gap-2 text-xs text-gray-600">
-                        <div
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: t.hex }}
-                        />
-                        {t.name}
-                      </div>
-                    </FadeIn>
-                  ))}
-                </div>
-              </div>
+              {tagData.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  Save more captures to see your tag breakdown.
+                </p>
+              ) : (
+                tagData.map((t, i) => (
+                  <TagBar
+                    key={t._id}
+                    tag={t._id}
+                    count={t.count}
+                    maxCount={maxTagCount}
+                    colorIdx={i}
+                    delay={0.3 + i * 0.06}
+                  />
+                ))
+              )}
             </div>
           </FadeIn>
 
           <div className="h-px bg-gray-100 mb-6" />
 
+          {/* ⑤ Memories 섹션: 과거 캡처 카드 리스트 */}
           <FadeIn delay={0.2}>
             <div className="mb-6">
               <div className="text-[11px] font-semibold text-gray-400 tracking-widest uppercase mb-1">
-                Reflection
+                Memories
               </div>
-              <div className="text-sm text-gray-500 mb-1">You&apos;ve reflected on</div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="text-sm text-gray-500 mb-1">
+                You&apos;ve captured
+              </div>
+              <div className="flex items-center gap-2 mb-4">
                 <UpArrow />
                 <span className="text-4xl font-bold text-gray-900 leading-none">
-                  {insightStats.reflectionCount}
+                  {memoriesData.length}
                 </span>
                 <span className="text-lg text-gray-500">moments</span>
               </div>
-              <div className="text-xs text-gray-400 mb-5">
-                December: {insightStats.reflectionPrev} moments
-              </div>
-
-              {reflections.map((r, i) => (
-                <ReflectionBar key={r.rank} {...r} delay={0.3 + i * 0.08} />
-              ))}
             </div>
           </FadeIn>
+
+          {memoriesData.length === 0 ? (
+            <p className="text-sm text-gray-400 mb-6">
+              Save captures to see your memories here.
+            </p>
+          ) : (
+            memoriesData.map((m, i) => (
+              <MemoryCaptureCard
+                key={m._id || i}
+                title={m.title}
+                summary={m.summary}
+                tags={m.tags}
+                createdAt={m.createdAt}
+                delay={0.3 + i * 0.06}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
