@@ -7,16 +7,16 @@ import { API_BASE } from "../utils/apiBase.js";
 
 // 태그 바 색상 팔레트 (순서대로 순환)
 const TAG_BAR_COLORS = [
-  "#F7C7D9", "#0DB8D3", "#5CA87C", "#EB96FF", "#1B7FDC",
-  "#B7E5BA", "#F9D4E0", "#0B5777", "#E888D1", "#288760",
+  "#60a5fa", "#34d399", "#fbbf24", "#f472b6", "#a78bfa",
+  "#67e8f9", "#fb7185", "#fcd34d", "#4ade80", "#c084fc",
 ];
 
 // "Who You're Becoming" 카드 배경 그라디언트 (순서대로 적용)
 const IDENTITY_GRADIENTS = [
-  "bg-gradient-to-br from-[#F7C7D9] to-[#E888D1]",
-  "bg-gradient-to-br from-[#0B5777] to-[#193153]",
-  "bg-gradient-to-br from-[#0DB8D3] to-[#065B98]",
-  "bg-gradient-to-br from-[#5CA87C] to-[#1A5140]",
+  "linear-gradient(to bottom right, #F7C7D9, #E888D1)",
+  "linear-gradient(to bottom right, #0B5777, #193153)",
+  "linear-gradient(to bottom right, #0DB8D3, #065B98)",
+  "linear-gradient(to bottom right, #5CA87C, #1A5140)",
 ];
 
 /* ──────────────────────────────────────
@@ -88,8 +88,9 @@ function IdentityCard({ emoji, subtitle, title, gradient, delay }) {
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`relative rounded-2xl p-5 pb-4 flex flex-col justify-between min-h-[180px] cursor-pointer overflow-hidden ${gradient}`}
+        className="relative rounded-2xl p-5 pb-4 flex flex-col justify-between min-h-[180px] cursor-pointer overflow-hidden"
         style={{
+          background: gradient,
           transform: hovered
             ? "translateY(-4px) scale(1.02)"
             : "translateY(0) scale(1)",
@@ -441,7 +442,7 @@ const Insight = () => {
                       analysisLoading ? "Analyzing..." : "Save more captures"
                     }
                     title="?"
-                    gradient="bg-gradient-to-br from-gray-200 to-gray-300"
+                    gradient="linear-gradient(to bottom right, #e5e7eb, #d1d5db)"
                     delay={0.25 + i * 0.1}
                   />
                 ))}
