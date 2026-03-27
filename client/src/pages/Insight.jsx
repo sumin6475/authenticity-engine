@@ -7,24 +7,16 @@ import { API_BASE } from "../utils/apiBase.js";
 
 // 태그 바 색상 팔레트 (순서대로 순환)
 const TAG_BAR_COLORS = [
-  "#97B3AE",
-  "#D2E0D3",
-  "#F0DDD6",
-  "#F2C3B9",
-  "#D6CBBF",
-  "#B8C5C1",
-  "#E5D4CB",
-  "#7A9A94",
-  "#E0C4BB",
-  "#BFB0A2",
+  "#F7C7D9", "#0DB8D3", "#5CA87C", "#EB96FF", "#1B7FDC",
+  "#B7E5BA", "#F9D4E0", "#0B5777", "#E888D1", "#288760",
 ];
 
 // "Who You're Becoming" 카드 배경 그라디언트 (순서대로 적용)
 const IDENTITY_GRADIENTS = [
-  "bg-gradient-to-br from-emerald-300 to-emerald-500",
-  "bg-gradient-to-br from-violet-300 to-violet-500",
-  "bg-gradient-to-br from-sky-300 to-blue-500",
-  "bg-gradient-to-br from-amber-300 to-orange-500",
+  "bg-gradient-to-br from-[#F7C7D9] to-[#E888D1]",
+  "bg-gradient-to-br from-[#0B5777] to-[#193153]",
+  "bg-gradient-to-br from-[#0DB8D3] to-[#065B98]",
+  "bg-gradient-to-br from-[#5CA87C] to-[#1A5140]",
 ];
 
 /* ──────────────────────────────────────
