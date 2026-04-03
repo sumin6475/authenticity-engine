@@ -19,6 +19,18 @@ router.get("/", async (req, res) => {
     }
 });
 
+router.get("/:id", async (req, res) => {
+    try {
+        const capture = await Capture.findById(req.params.id);
+        if(!capture){
+            return res.status(404).json({success: false, error: "Capture not found"});
+        }
+        res.json({success: true, data: capture});
+    }catch(error){
+        res.status(500).json({success: false, error: error.message});
+    }
+})
+
 router.get("/similar/:id", async (req, res) => {
     try{
         const capture = await Capture.findById(req.params.id);

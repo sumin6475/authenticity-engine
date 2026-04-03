@@ -1,5 +1,7 @@
 # 환경 변수 (API key 등 비밀 정보)
 .env
+.env.local
+client/.env.local
  
 # Node.js 의존성 (npm install로 다시 설치 가능)
 node_modules/
@@ -15,3 +17,6 @@ Thumbs.db
 # 에디터 설정
 .vscode/
 .idea/
+
+Authenticity_Engine_PRD.docx
+mock-up/

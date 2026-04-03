@@ -1,14 +1,15 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout';
-import Home from './pages/Home';
-import Capture from './pages/Capture';
-import Reflection from './pages/Reflection';
-import Insight from './pages/Insight';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Capture from "./pages/Capture";
+import Reflection from "./pages/Reflection";
+import Insight from "./pages/Insight";
+import CaptureDetail from "./pages/CaptureDetail";
 
 const App = () => {
   return (
     <BrowserRouter>
-      <Routes>
+      <Routes>  
         {/* Capture는 하단 네비 없이 전체 화면 */}
         <Route path="/capture" element={<Capture />} />
         {/* 나머지는 Layout(하단 네비) 포함 */}
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/reflection" element={<Reflection />} />
           <Route path="/insight" element={<Insight />} />
+          <Route path="/capture/:id" element={<CaptureDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

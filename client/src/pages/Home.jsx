@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { API_BASE } from "../utils/apiBase.js";
+import { useNavigate } from "react-router-dom";
 
 // 요소가 화면에 들어오면 visible — 스크롤 시 순차 등장 애니메이션용
 function useInView(threshold = 0.15) {
@@ -150,6 +151,7 @@ const CONTENT_THUMB_BGS = ["#e8ddd4", "#dce4e8", "#e4e0d8", "#d8e4dc"];
 
 // History 리스트 한 줄 (썸네일은 플레이스홀더)
 function ContentCard({
+  id,
   title,
   description,
   tags,
@@ -158,6 +160,7 @@ function ContentCard({
   delay,
   thumbIndex,
 }) {
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const [isStarred, setIsStarred] = useState(starred);
   const bg = CONTENT_THUMB_BGS[thumbIndex % CONTENT_THUMB_BGS.length];
@@ -165,6 +168,7 @@ function ContentCard({
   return (
     <FadeIn delay={delay}>
       <article
+        onClick={() => navigate(`/capture/${id}`)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className="border-b border-gray-100 pb-5 mb-5 cursor-pointer"
@@ -282,7 +286,7 @@ const Home = () => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
           throw new Error(
-            data?.error || `서버 응답 ${res.status} (${res.statusText})`,
+            data?.error || `Server responded ${res.status} (${res.statusText})`,
           );
         }
         return data;
@@ -293,14 +297,14 @@ const Home = () => {
           setCaptures(data.data);
         } else {
           setCaptures([]);
-          setCapturesError(data?.error || "목록 형식이 올바르지 않습니다.");
+          setCapturesError(data?.error || "Invalid list format.");
         }
       })
       .catch((err) => {
         if (cancelled) return;
         console.error("GET /api/captures:", API_BASE, err);
         setCaptures([]);
-        setCapturesError(err.message || "목록을 불러오지 못했습니다.");
+        setCapturesError(err.message || "Failed to load the list.");
       })
       .finally(() => {
         if (!cancelled) setCapturesLoading(false);
@@ -348,9 +352,9 @@ const Home = () => {
               </h1>
               <span className="text-sm text-gray-400">
                 {capturesLoading
-                  ? "불러오는 중…"
+                  ? "Loading..."
                   : capturesError
-                    ? "불러오기 실패"
+                    ? "Load failed"
                     : `${captures.length} Items`}
               </span>
             </div>
@@ -487,6 +491,7 @@ const Home = () => {
           {captures.map((item, i) => (
             <ContentCard
               key={item._id ?? item.id}
+              id={item._id}
               title={item.title}
               description={item.summary || item.content?.slice(0, 150) + "..."}
               tags={item.tags || []}

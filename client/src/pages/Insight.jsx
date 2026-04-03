@@ -7,8 +7,16 @@ import { API_BASE } from "../utils/apiBase.js";
 
 // 태그 바 색상 팔레트 (순서대로 순환)
 const TAG_BAR_COLORS = [
-  "#60a5fa", "#34d399", "#fbbf24", "#f472b6", "#a78bfa",
-  "#67e8f9", "#fb7185", "#fcd34d", "#4ade80", "#c084fc",
+  "#60a5fa",
+  "#34d399",
+  "#fbbf24",
+  "#f472b6",
+  "#a78bfa",
+  "#67e8f9",
+  "#fb7185",
+  "#fcd34d",
+  "#4ade80",
+  "#c084fc",
 ];
 
 // "Who You're Becoming" 카드 배경 그라디언트 (순서대로 적용)
