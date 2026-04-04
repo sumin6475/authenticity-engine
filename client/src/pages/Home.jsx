@@ -46,6 +46,41 @@ function Carousel({ slides }) {
   const [active, setActive] = useState(0);
   const total = slides.length;
   const safeIndex = total ? active % total : 0;
+  const navigate = useNavigate();
+  const swiped = useRef(false);
+
+  //스와이프
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    touchEndX.current = e.changedTouches[0].clientX;
+    const diff = touchEndX.current - touchStartX.current;
+    const threshold = 50;
+    // 손가락을 왼쪽으로 치면 diff < 0 → 다음 슬라이드, 오른쪽이면 이전
+    if (diff < -threshold) {
+      swiped.current = true;
+      setActive((a) => (a + 1) % total);
+    } else if (diff > threshold) {
+      swiped.current = true;
+      setActive((a) => (a - 1 + total) % total);
+    } else {
+      swiped.current = true;
+      navigate(`/capture/${slides[safeIndex]._id}`);
+    }
+  };
+
+  const handleClick = () => {
+    if (swiped.current) {
+      swiped.current = false;
+      return;
+    }
+    //웹 처리
+    navigate(`/capture/${slides[safeIndex]._id}`);
+  };
 
   if (!total) return null;
 
@@ -55,7 +90,9 @@ function Carousel({ slides }) {
         type="button"
         className="rounded-2xl overflow-hidden relative cursor-pointer group w-full text-left border-0 p-0"
         style={{ height: 200 }}
-        onClick={() => setActive((a) => (a + 1) % total)}
+        onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         aria-label={`Recently saved slide ${safeIndex + 1} of ${total}. Tap for next.`}
       >
         <div
