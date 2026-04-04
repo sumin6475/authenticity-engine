@@ -331,10 +331,8 @@ const Reflection = () => {
 
   return (
     <div
-      className="min-h-[calc(100dvh-5rem)] px-5 pb-6 max-w-mobile mx-auto flex flex-col"
+      className="min-h-[calc(100dvh-5rem)] px-5 pb-6 w-full flex flex-col bg-white"
       style={{
-        background:
-          "linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 50%, #dbeafe 100%)",
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}

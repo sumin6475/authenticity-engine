@@ -12,6 +12,8 @@ const captureSchema = new mongoose.Schema({
     type: { type: String, enum: ["idea", "link"], default: "idea" },
 
     url: { type: String, default: ""},
+    /** 썸네일 이미지 URL (선택) — 있으면 Home History 카드에 표시 */
+    thumbnail: { type: String, default: "" },
     note: { type: String, default: ""},
 
     // AI가 생성한 태그들 

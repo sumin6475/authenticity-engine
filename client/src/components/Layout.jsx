@@ -6,7 +6,7 @@ import Fab from './Fab';
 const Layout = () => {
   return (
     <div className="min-h-screen pb-20">
-      <div className="mx-auto max-w-mobile min-h-full">
+      <div className="w-full min-h-full">
         <Outlet />
       </div>
       <Fab />

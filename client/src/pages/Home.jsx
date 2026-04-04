@@ -84,6 +84,8 @@ function Carousel({ slides }) {
 
   if (!total) return null;
 
+  const slide = slides[safeIndex];
+
   return (
     <div className="mb-5">
       <button
@@ -95,40 +97,57 @@ function Carousel({ slides }) {
         onTouchEnd={handleTouchEnd}
         aria-label={`Recently saved slide ${safeIndex + 1} of ${total}. Tap for next.`}
       >
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{
-            background:
-              CAROUSEL_PLACEHOLDER_BGS[
-                safeIndex % CAROUSEL_PLACEHOLDER_BGS.length
-              ],
-          }}
-        >
-          <div className="flex flex-col items-center gap-2 opacity-40">
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-            >
-              <rect
-                x="3"
-                y="3"
-                width="18"
-                height="18"
-                rx="2"
-                stroke="#666"
-                strokeWidth="1.5"
-              />
-              <circle cx="8.5" cy="8.5" r="1.5" fill="#666" />
-              <path d="M3 16l5-5 4 4 3-3 6 6" stroke="#666" strokeWidth="1.5" />
-            </svg>
-            <span className="text-xs text-gray-500 px-4 text-center">
-              {slides[safeIndex].title}
-            </span>
+        {slide.thumbnail ? (
+          <>
+            <img
+              src={slide.thumbnail}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent pt-8 pb-2 px-3">
+              <span className="text-xs text-white line-clamp-2 font-medium">
+                {slide.title}
+              </span>
+            </div>
+          </>
+        ) : (
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{
+              background:
+                CAROUSEL_PLACEHOLDER_BGS[
+                  safeIndex % CAROUSEL_PLACEHOLDER_BGS.length
+                ],
+            }}
+          >
+            <div className="flex flex-col items-center gap-2 opacity-40">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden
+              >
+                <rect
+                  x="3"
+                  y="3"
+                  width="18"
+                  height="18"
+                  rx="2"
+                  stroke="#666"
+                  strokeWidth="1.5"
+                />
+                <circle cx="8.5" cy="8.5" r="1.5" fill="#666" />
+                <path d="M3 16l5-5 4 4 3-3 6 6" stroke="#666" strokeWidth="1.5" />
+              </svg>
+              <span className="text-xs text-gray-500 px-4 text-center">
+                {slide.title}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
       </button>
       <div
@@ -184,117 +203,103 @@ function Tag({ label }) {
   );
 }
 
-const CONTENT_THUMB_BGS = ["#e8ddd4", "#dce4e8", "#e4e0d8", "#d8e4dc"];
-
-// History 리스트 한 줄 (썸네일은 플레이스홀더)
+// History 리스트 한 줄 — thumbnail URL 있으면 이미지, 없으면 영역 자체 미표시
 function ContentCard({
   id,
+  thumbnail,
   title,
   description,
   tags,
   date,
   starred,
   delay,
-  thumbIndex,
 }) {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const [isStarred, setIsStarred] = useState(starred);
-  const bg = CONTENT_THUMB_BGS[thumbIndex % CONTENT_THUMB_BGS.length];
 
   return (
     <FadeIn delay={delay}>
-      <article
-        onClick={() => navigate(`/capture/${id}`)}
+      <div
+        className="bg-white rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.06)] px-3 py-4 mb-3 overflow-hidden relative"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="border-b border-gray-100 pb-5 mb-5 cursor-pointer"
         style={{
-          transform: hovered ? "translateX(4px)" : "translateX(0)",
+          transform: hovered ? "translateY(-4px)" : "translateY(0)",
           transition: "transform 0.2s ease",
         }}
       >
-        <div
-          className="rounded-xl overflow-hidden mb-3 relative"
-          style={{ height: 180 }}
+        <article
+          onClick={() => navigate(`/capture/${id}`)}
+          className="cursor-pointer"
         >
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ background: bg }}
-          >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="opacity-30"
-              aria-hidden
+          {/* 썸네일 URL이 있을 때만 영역 표시 (Mongo에 thumbnail 등 필드 추가 후 연동) */}
+          {thumbnail ? (
+            <div
+              className="rounded-xl overflow-hidden mb-3 relative"
+              style={{ height: 180 }}
             >
-              <rect
-                x="3"
-                y="3"
-                width="18"
-                height="18"
-                rx="2"
-                stroke="#666"
-                strokeWidth="1.5"
+              <img
+                src={thumbnail}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                referrerPolicy="no-referrer"
               />
-              <circle cx="8.5" cy="8.5" r="1.5" fill="#666" />
-              <path d="M3 16l5-5 4 4 3-3 6 6" stroke="#666" strokeWidth="1.5" />
-            </svg>
-          </div>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsStarred(!isStarred);
-            }}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-300"
-            style={{
-              background: isStarred
-                ? "rgba(250,204,21,0.2)"
-                : "rgba(0,0,0,0.2)",
-              transform: isStarred ? "scale(1.1)" : "scale(1)",
-            }}
-            aria-label={isStarred ? "Remove star" : "Star item"}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsStarred(!isStarred);
+                }}
+                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-300"
+                style={{
+                  background: isStarred
+                    ? "rgba(250,204,21,0.2)"
+                    : "rgba(0,0,0,0.2)",
+                  transform: isStarred ? "scale(1.1)" : "scale(1)",
+                }}
+                aria-label={isStarred ? "Remove star" : "Star item"}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+                  <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                    fill={isStarred ? "#facc15" : "none"}
+                    stroke={isStarred ? "#facc15" : "#fff"}
+                    strokeWidth="2"
+                  />
+                </svg>
+              </button>
+            </div>
+          ) : null}
+
+          <h3
+            className="text-[15px] font-bold text-gray-900 leading-snug mb-1"
+            style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
-              <path
-                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                fill={isStarred ? "#facc15" : "none"}
-                stroke={isStarred ? "#facc15" : "#fff"}
-                strokeWidth="2"
-              />
-            </svg>
-          </button>
-        </div>
+            {title}
+          </h3>
+          <p
+            className="text-sm text-gray-500 leading-relaxed mb-3 line-clamp-3"
+            style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
+          >
+            {description}
+          </p>
 
-        <h3
-          className="text-[15px] font-bold text-gray-900 leading-snug mb-1"
-          style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
-        >
-          {title}
-        </h3>
-        <p
-          className="text-sm text-gray-500 leading-relaxed mb-3 line-clamp-3"
-          style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
-        >
-          {description}
-        </p>
+          <div className="flex gap-2 flex-wrap mb-2">
+            {tags.map((t) => (
+              <Tag key={t} label={t} />
+            ))}
+          </div>
 
-        <div className="flex gap-2 flex-wrap mb-2">
-          {tags.map((t) => (
-            <Tag key={t} label={t} />
-          ))}
-        </div>
-
-        <div
-          className="text-xs text-gray-400"
-          style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
-        >
-          {date}
-        </div>
-      </article>
+          <div
+            className="text-xs text-gray-400"
+            style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
+          >
+            {date}
+          </div>
+        </article>
+      </div>
     </FadeIn>
   );
 }
@@ -361,10 +366,8 @@ const Home = () => {
 
   return (
     <div
-      className="min-h-[calc(100dvh-5rem)] px-5 pb-6 max-w-mobile mx-auto flex flex-col"
+      className="min-h-[calc(100dvh-5rem)] px-5 pb-6 w-full flex flex-col bg-white"
       style={{
-        background:
-          "linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 50%, #dbeafe 100%)",
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
@@ -543,7 +546,7 @@ const Home = () => {
               })}
               starred={false}
               delay={0.3 + i * 0.1}
-              thumbIndex={i}
+              thumbnail={item.thumbnail}
             />
           ))}
 

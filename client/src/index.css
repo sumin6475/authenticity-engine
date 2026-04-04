@@ -2,11 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 모바일 퍼스트: 루트 최대 너비 430px, 가운데 정렬, 흰색 배경 */
+/* 앱 컬럼 430px 가운데 정렬 */
 #root {
   @apply max-w-mobile mx-auto min-h-screen bg-white;
 }
 
 body {
   @apply m-0 antialiased text-gray-800 font-sans;
+  background: #fff;
 }

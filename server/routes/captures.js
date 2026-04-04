@@ -109,16 +109,21 @@ router.post("/from-url", async(req, res)=> {
         //2. AI 분석
         const aiResult = await analyzeCaptureText(article.textContent);
 
-        //3. 저장
+        const textForEmbedding = `${article.title} ${article.textContent}`;
+        const embedding = await generateEmbedding(textForEmbedding);
+
+        //3. 저장 (thumbnail은 fetchArticle에서 og/twitter 메타 → 절대 URL)
         const capture = await Capture.create({
             title: article.title,
             content: article.textContent,
             type: "link",
             url,
+            thumbnail: article.thumbnail || "",
             note: note || "",
             tags: aiResult.tags,
             category: aiResult.category,
             summary: aiResult.summary,
+            embedding,
         });
         res.status(201).json({success: true, data: capture});
 
