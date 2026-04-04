@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { recommended, recaps } from "../utils/dummyData";
 import { API_BASE } from "../utils/apiBase.js";
+import { useNavigate } from "react-router-dom";
 
 /* ──────────────────────────────────────
    공용 UI 컴포넌트
@@ -270,6 +271,7 @@ const PHOTO_THUMB_COLORS = [
      6) Recaps (주간·월간 카드)
    ────────────────────────────────────── */
 const Reflection = () => {
+  const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   // Today's Prompt 입력 상태
   const [promptText, setPromptText] = useState("");
@@ -360,6 +362,7 @@ const Reflection = () => {
               type="button"
               className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
               aria-label="Profile"
+              onClick={() => navigate("/profile")}
             >
               <svg
                 width="18"

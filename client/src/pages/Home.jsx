@@ -312,6 +312,8 @@ const Home = () => {
   const [capturesLoading, setCapturesLoading] = useState(true);
   const [capturesError, setCapturesError] = useState(null);
 
+  const navigate = useNavigate();
+
   // 마운트 시 한 번만 GET — 배포 URL은 VITE_API_BASE (없으면 localhost)
   useEffect(() => {
     let cancelled = false;
@@ -399,6 +401,7 @@ const Home = () => {
               type="button"
               className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors mt-1 border-0 p-0"
               aria-label="Profile"
+              onClick={() => navigate("/profile")}
             >
               <svg
                 width="18"

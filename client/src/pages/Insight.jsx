@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { API_BASE } from "../utils/apiBase.js";
+import { useNavigate } from "react-router-dom";
 
 /* ──────────────────────────────────────
    설정값 / 상수
@@ -297,6 +298,7 @@ function PatternSection({ analysis, analysisLoading }) {
 const Insight = () => {
   const [mounted, setMounted] = useState(false);
   const scrollRef = useRef(null);
+  const navigate = useNavigate();
 
   // 서버에서 받아온 AI 패턴 분석 텍스트 + identity 카드
   const [analysis, setAnalysis] = useState(null);
@@ -402,6 +404,7 @@ const Insight = () => {
               type="button"
               className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
               aria-label="Profile"
+              onClick={() => navigate("/profile")}
             >
               <svg
                 width="18"
