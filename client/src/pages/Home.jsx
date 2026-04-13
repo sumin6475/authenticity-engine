@@ -39,8 +39,59 @@ function FadeIn({ children, delay = 0, className = "" }) {
   );
 }
 
-const CAROUSEL_PLACEHOLDER_BGS = ["#e8e0d8", "#d4dce4", "#dce8d4", "#e4d8e8"];
+function HeroSection({ userName, captures }) {
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thisWeekCaptures = captures.filter(
+    (c) => new Date(c.createdAt) > weekAgo,
+  ).length;
 
+  //첫 캡쳐기준으로 가입일 대체 (Auth 후엔 유저 정보로)
+  const oldestCapture =
+    captures.length > 0
+      ? new Date(
+          Math.min(...captures.map((c) => new Date(c.createdAt).getTime())),
+        )
+      : now;
+  const dayOfBecoming = Math.max(
+    1,
+    Math.floor((now - oldestCapture) / (1000 * 60 * 60 * 24)),
+  );
+
+  return (
+    <FadeIn delay={0.1}>
+      <div className="pt-5 pt-6">
+        <h1 className="text-5xl font-bold text-gray-900 leading-tight">
+          {userName},
+        </h1>
+        <p className="text-3xl text-gray-700 mt-1 font-serif">
+          You are the BRAND
+        </p>
+
+        <div className="gap-8 mt-6 mb-8">
+          <div>
+            <span className="text-3xl font-bold text-gray-300">
+              {thisWeekCaptures}
+            </span>
+            <span className="text-base font-medium text-gray-900 ml-2">
+              this week
+            </span>
+          </div>
+          <div>
+            <span className="text-3xl font-bold text-gray-300">
+              {dayOfBecoming}
+            </span>
+            <span className="text-base font-medium text-gray-900 ml-2">
+              days of becoming
+            </span>
+          </div>
+        </div>
+      </div>
+    </FadeIn>
+  );
+}
+
+const CAROUSEL_PLACEHOLDER_BGS = ["#e8e0d8", "#d4dce4", "#dce8d4", "#e4d8e8"];
 // Recently Saved 상단 — slides는 캡처 객체 배열 (title 등)
 function Carousel({ slides }) {
   const [active, setActive] = useState(0);
@@ -140,7 +191,11 @@ function Carousel({ slides }) {
                   strokeWidth="1.5"
                 />
                 <circle cx="8.5" cy="8.5" r="1.5" fill="#666" />
-                <path d="M3 16l5-5 4 4 3-3 6 6" stroke="#666" strokeWidth="1.5" />
+                <path
+                  d="M3 16l5-5 4 4 3-3 6 6"
+                  stroke="#666"
+                  strokeWidth="1.5"
+                />
               </svg>
               <span className="text-xs text-gray-500 px-4 text-center">
                 {slide.title}
@@ -389,16 +444,7 @@ const Home = () => {
         <FadeIn delay={0.1}>
           <div className="flex justify-between items-start px-5 pt-5 pb-1 shrink-0 border-b border-gray-100/80">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight m-0 leading-tight">
-                Recently Saved
-              </h1>
-              <span className="text-sm text-gray-400">
-                {capturesLoading
-                  ? "Loading..."
-                  : capturesError
-                    ? "Load failed"
-                    : `${captures.length} Items`}
-              </span>
+              <HeroSection userName="Sumin" captures={captures} />
             </div>
             <button
               type="button"
@@ -434,13 +480,6 @@ const Home = () => {
               {capturesError}
             </p>
           )}
-
-          {/* 최신 4개만 캐러셀 */}
-          <FadeIn delay={0.2}>
-            <div className="mt-3">
-              <Carousel slides={captures.slice(0, 4)} />
-            </div>
-          </FadeIn>
 
           {/* History 제목 + 필터 버튼 (상태 연동은 추후) */}
           <FadeIn delay={0.25}>
