@@ -7,7 +7,13 @@ import { NavLink } from 'react-router-dom';
  */
 const BottomNav = () => {
   return (
-    <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[min(280px,70vw)] rounded-full bg-white shadow-lg px-4 py-2">
+    <nav
+      className="fixed left-1/2 -translate-x-1/2 z-50 w-[min(280px,70vw)] rounded-full bg-white shadow-lg px-4 py-2"
+      style={{
+        // Layout의 기준값을 그대로 사용해서 safe area + 간격을 일관되게 맞춘다.
+        bottom: "calc(var(--bottom-nav-gap) + env(safe-area-inset-bottom))",
+      }}
+    >
       <div className="flex items-center justify-around gap-1">
         <NavLink
           to="/"

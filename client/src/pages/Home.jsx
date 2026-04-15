@@ -31,7 +31,7 @@ function FadeIn({ children, delay = 0, className = "" }) {
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(18px)",
-        transition: `opacity 0.55s ease ${delay}s, transform 0.55s ease ${delay}s`,
+        transition: `opacity 0.22s ease-out ${delay}s, transform 0.22s ease-out ${delay}s`,
       }}
     >
       {children}
@@ -60,11 +60,11 @@ function HeroSection({ userName, captures }) {
 
   return (
     <FadeIn delay={0.1}>
-      <div className="pt-5 pt-6">
-        <h1 className="text-5xl font-bold text-gray-900 leading-tight">
+      <div className="pt-3">
+        <h1 className="text-4xl font-bold text-gray-900 leading-tight">
           {userName},
         </h1>
-        <p className="text-3xl text-gray-700 mt-1 font-serif">
+        <p className="text-4xl text-gray-700 mt-1 font-serif">
           You are the BRAND
         </p>
 
@@ -92,7 +92,8 @@ function HeroSection({ userName, captures }) {
 }
 
 const CAROUSEL_PLACEHOLDER_BGS = ["#e8e0d8", "#d4dce4", "#dce8d4", "#e4d8e8"];
-// Recently Saved 상단 — slides는 캡처 객체 배열 (title 등)
+
+//not used
 function Carousel({ slides }) {
   const [active, setActive] = useState(0);
   const total = slides.length;
@@ -286,51 +287,53 @@ function ContentCard({
       >
         <article
           onClick={() => navigate(`/capture/${id}`)}
-          className="cursor-pointer"
+          className="cursor-pointer relative"
         >
           {/* 썸네일 URL이 있을 때만 영역 표시 (Mongo에 thumbnail 등 필드 추가 후 연동) */}
-          {thumbnail ? (
+          {isStarred && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsStarred(!isStarred);
+              }}
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-300"
+              style={{
+                background: isStarred
+                  ? "rgba(250,204,21,0.2)"
+                  : "rgba(0,0,0,0.2)",
+                transform: isStarred ? "scale(1.1)" : "scale(1)",
+              }}
+              aria-label={isStarred ? "Remove star" : "Star item"}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  fill={isStarred ? "#facc15" : "none"}
+                  stroke={isStarred ? "#facc15" : "#fff"}
+                  strokeWidth="2"
+                />
+              </svg>
+            </button>
+          )}
+          {thumbnail && (
             <div
-              className="rounded-xl overflow-hidden mb-3 relative"
+              className="rounded-xl overflow-hidden mb-3"
               style={{ height: 180 }}
             >
               <img
                 src={thumbnail}
                 alt=""
-                className="absolute inset-0 h-full w-full object-cover"
+                className="inset-0 h-full w-full object-cover"
                 loading="lazy"
                 referrerPolicy="no-referrer"
               />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsStarred(!isStarred);
-                }}
-                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-300"
-                style={{
-                  background: isStarred
-                    ? "rgba(250,204,21,0.2)"
-                    : "rgba(0,0,0,0.2)",
-                  transform: isStarred ? "scale(1.1)" : "scale(1)",
-                }}
-                aria-label={isStarred ? "Remove star" : "Star item"}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
-                  <path
-                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                    fill={isStarred ? "#facc15" : "none"}
-                    stroke={isStarred ? "#facc15" : "#fff"}
-                    strokeWidth="2"
-                  />
-                </svg>
-              </button>
             </div>
-          ) : null}
+          )}
 
+          {/* title, description, tags, date */}
           <h3
-            className="text-[15px] font-bold text-gray-900 leading-snug mb-1"
-            style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
+            className={`text-[15px] font-bold leading-snug mb-1 ${isStarred && !thumbnail ? "pr-10" : ""}`}
           >
             {title}
           </h3>
@@ -372,6 +375,9 @@ const Home = () => {
   const [capturesLoading, setCapturesLoading] = useState(true);
   const [capturesError, setCapturesError] = useState(null);
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
   const navigate = useNavigate();
 
   // 마운트 시 한 번만 GET — 배포 URL은 VITE_API_BASE (없으면 localhost)
@@ -380,34 +386,34 @@ const Home = () => {
     setCapturesLoading(true);
     setCapturesError(null);
 
-    fetch(`${API_BASE}/api/captures`)
-      .then(async (res) => {
+    const loadCaptures = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/captures?page=1`);
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
           throw new Error(
             data?.error || `Server responded ${res.status} (${res.statusText})`,
           );
         }
-        return data;
-      })
-      .then((data) => {
         if (cancelled) return;
         if (data.success && Array.isArray(data.data)) {
           setCaptures(data.data);
+          setHasMore(data.hasMore);
         } else {
           setCaptures([]);
           setCapturesError(data?.error || "Invalid list format.");
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         if (cancelled) return;
         console.error("GET /api/captures:", API_BASE, err);
         setCaptures([]);
         setCapturesError(err.message || "Failed to load the list.");
-      })
-      .finally(() => {
+      } finally {
         if (!cancelled) setCapturesLoading(false);
-      });
+      }
+    };
+
+    loadCaptures();
 
     return () => {
       cancelled = true;
@@ -415,9 +421,24 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 100);
+    const t = setTimeout(() => setMounted(true), 30);
     return () => clearTimeout(t);
   }, []);
+
+  const loadMore = async () => {
+    const nextPage = page + 1;
+    try {
+      const res = await fetch(`${API_BASE}/api/captures?page=${nextPage}`);
+      const data = await res.json();
+      if (data.success) {
+        setCaptures((prev) => [...prev, ...data.data]);
+        setHasMore(data.hasMore);
+        setPage(nextPage);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div
@@ -437,15 +458,11 @@ const Home = () => {
         style={{
           opacity: mounted ? 1 : 0,
           transform: mounted ? "translateY(0)" : "translateY(16px)",
-          transition: "opacity 0.8s ease, transform 0.8s ease",
+          transition: "opacity 0.35s ease-out, transform 0.35s ease-out",
         }}
       >
-        {/* Recently Saved 헤더 + 프로필 자리 */}
         <FadeIn delay={0.1}>
-          <div className="flex justify-between items-start px-5 pt-5 pb-1 shrink-0 border-b border-gray-100/80">
-            <div>
-              <HeroSection userName="Sumin" captures={captures} />
-            </div>
+          <div className="flex justify-end pt-5 pr-5">
             <button
               type="button"
               className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors mt-1 border-0 p-0"
@@ -465,6 +482,12 @@ const Home = () => {
                 />
               </svg>
             </button>
+          </div>
+
+          <div className="flex justify-between items-start px-5 pt-5 pb-1 shrink-0 border-b border-gray-100/80">
+            <div>
+              <HeroSection userName="Sumin" captures={captures} />
+            </div>
           </div>
         </FadeIn>
 
@@ -547,24 +570,6 @@ const Home = () => {
                     </svg>
                   }
                 />
-                <FilterIcon
-                  active={false}
-                  color=""
-                  ariaLabel="Sort or filter list"
-                  icon={
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      aria-hidden
-                    >
-                      <path d="M3 4h18M7 8h10M10 12h4" strokeLinecap="round" />
-                    </svg>
-                  }
-                />
               </div>
             </div>
           </FadeIn>
@@ -584,11 +589,22 @@ const Home = () => {
                 day: "numeric",
               })}
               starred={false}
-              delay={0.3 + i * 0.1}
+              delay={0.06 + i * 0.02}
               thumbnail={item.thumbnail}
             />
           ))}
-
+          {hasMore && (
+            <div className="sticky bottom-0 pt-2 pb-2 bg-gradient-to-t from-white via-white to-transparent">
+              {/* 리스트 끝에서 버튼을 떠 있게 유지해서 Home만 과한 하단 공백이 생기지 않게 함 */}
+              <button
+                type="button"
+                onClick={loadMore}
+                className="w-full rounded-xl border border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Load more
+              </button>
+            </div>
+          )}
           <div className="h-4" />
         </div>
       </div>

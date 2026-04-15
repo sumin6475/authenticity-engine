@@ -7,13 +7,16 @@ import { generateEmbedding } from "../services/embedding.js";
 
 const router = express.Router();
 
-//모든 캡쳐 가져오기
+//모든 캡쳐 가져오기 (페이지네이션 적용)
 router.get("/", async (req, res) => {
     try {
-    //최신순으로 정렬해서 가져오기
-    // lean() → 순수 객체로 직렬화(프론트·프록시에서 이슈 줄임)
-    const captures = await Capture.find().sort({ createdAt: -1 }).lean();
-    res.json({ success: true, data: captures });
+        const page = parseInt(req.query.page) || 1; 
+        const limit = page === 1 ? 10 : 5;
+        const skip = page === 1 ? 0 : 10 + (page -2 ) * 5;
+        
+        const captures = await Capture.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
+        const total = await Capture.countDocuments();
+        res.json({ success: true, data: captures, hasMore: skip + captures.length < total,});
     } catch (error) {
         res.status(500).json({ success: false, error: error.message});
     }

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { recommended, recaps } from "../utils/dummyData";
 import { API_BASE } from "../utils/apiBase.js";
-import { useNavigate } from "react-router-dom";
 
 /* ──────────────────────────────────────
    공용 UI 컴포넌트
@@ -271,7 +270,6 @@ const PHOTO_THUMB_COLORS = [
      6) Recaps (주간·월간 카드)
    ────────────────────────────────────── */
 const Reflection = () => {
-  const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   // Today's Prompt 입력 상태
   const [promptText, setPromptText] = useState("");
@@ -350,34 +348,6 @@ const Reflection = () => {
           transition: "opacity 0.8s ease, transform 0.8s ease",
         }}
       >
-        {/* ① 헤더: "Reflection" + 프로필 아이콘 */}
-        <FadeIn delay={0.1}>
-          <div className="flex justify-between items-center px-5 pt-5 pb-2 shrink-0 border-b border-gray-100/80">
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight m-0">
-              Reflection
-            </h1>
-            <button
-              type="button"
-              className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
-              aria-label="Profile"
-              onClick={() => navigate("/profile")}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden
-              >
-                <path
-                  d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"
-                  fill="#60a5fa"
-                />
-              </svg>
-            </button>
-          </div>
-        </FadeIn>
-
         <div
           className="flex-1 overflow-y-auto px-5 pb-4"
           style={{ scrollBehavior: "smooth" }}

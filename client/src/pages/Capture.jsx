@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API_BASE } from "../utils/apiBase.js";
 
 /**
  * Capture: "I thought about..." — Idea / URL 모드, 파싱·저장 API 연동
  * 전체 화면 라우트(하단 네비 없음) — 바텀시트 스타일 UI
  */
-const Capture = () => {
+const Capture = ({ onComplete, inBottomSheet = false }) => {
+  const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const [activeMode, setActiveMode] = useState("idea");
   const [title, setTitle] = useState("");
@@ -74,7 +75,12 @@ const Capture = () => {
         const data = await response.json();
         if (data.success) {
           alert("Captured!");
-          window.location.href = "/";
+          // 바텀시트 모드에서는 시트만 닫고, 페이지 모드에서는 홈으로 이동한다.
+          if (inBottomSheet) {
+            onComplete?.();
+          } else {
+            navigate("/");
+          }
           setTitle("");
           setBody("");
         } else {
@@ -105,7 +111,12 @@ const Capture = () => {
         const data = await response.json();
         if (data.success) {
           alert("Captured!");
-          window.location.href = "/";
+          // 바텀시트 모드에서는 시트만 닫고, 페이지 모드에서는 홈으로 이동한다.
+          if (inBottomSheet) {
+            onComplete?.();
+          } else {
+            navigate("/");
+          }
           setUrl("");
           setBody("");
           setParsedData(data.data);
@@ -122,9 +133,9 @@ const Capture = () => {
 
   return (
     <div
-      className="min-h-dvh flex flex-col max-w-mobile mx-auto"
+      className={`${inBottomSheet ? "h-full flex flex-col" : "min-h-dvh flex flex-col max-w-mobile mx-auto"}`}
       style={{
-        background: "#F1F0F6",
+        background: inBottomSheet ? "#f0f0f0" : "#F1F0F6",
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
@@ -143,38 +154,64 @@ const Capture = () => {
           transition: "opacity 0.8s ease, transform 0.8s ease",
         }}
       >
-        {/* 딤 처리된 상단 (이전 화면 느낌) */}
-        <div
-          className="shrink-0"
-          style={{ background: "rgba(100,100,100,0.95)", height: 110 }}
-        />
+        {/* 전체 페이지 모드에서만 상단 딤 영역을 보여준다. */}
+        {!inBottomSheet && (
+          <div
+            className="shrink-0"
+            style={{ background: "rgba(100,100,100,0.95)", height: 110 }}
+          />
+        )}
 
         {/* 바텀시트 본문 */}
         <div
-          className="flex-1 flex flex-col min-h-0 rounded-t-3xl relative -mt-4"
+          className={`flex-1 flex flex-col min-h-0 relative ${inBottomSheet ? "" : "rounded-t-3xl -mt-4"}`}
           style={{ background: "#f0f0f0" }}
         >
           <div className="flex justify-between items-center px-5 pt-5 pb-3 shrink-0">
-            <Link
-              to="/"
-              className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
-              style={{ background: "rgba(200,200,200,0.6)" }}
-              aria-label="Back"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#555"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
+            {inBottomSheet ? (
+              <button
+                type="button"
+                onClick={() => onComplete?.()}
+                className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                style={{ background: "rgba(200,200,200,0.6)" }}
+                aria-label="Close"
               >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </Link>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#555"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            ) : (
+              <Link
+                to="/"
+                className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
+                style={{ background: "rgba(200,200,200,0.6)" }}
+                aria-label="Back"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#555"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </Link>
+            )}
             <button
               type="button"
               onClick={handleSave}
@@ -212,7 +249,7 @@ const Capture = () => {
           </h1>
 
           <div
-            className="mx-6 mb-4 flex rounded-full p-1 shrink-0"
+            className="mx-6 mb-4 mt-4 flex rounded-full p-1 shrink-0"
             style={{ background: "rgba(210,210,210,0.5)" }}
             role="tablist"
             aria-label="Capture mode"
