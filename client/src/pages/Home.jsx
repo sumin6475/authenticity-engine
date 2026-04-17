@@ -46,7 +46,7 @@ function HeroSection({ userName }) {
     <FadeIn delay={0.1}>
       <div className="pt-3">
         <h1
-          className="text-[42px] font-black text-gray-900 leading-[1.1] tracking-tight"
+          className="text-[42px] font-bold text-gray-900 leading-[1.1] tracking-tight"
           style={{
             fontFamily:
               "'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
@@ -55,10 +55,10 @@ function HeroSection({ userName }) {
           {userName},
         </h1>
         <p
-          className="text-[26px] font-light text-[#8b8b96] mt-1 leading-[1.2] tracking-tight"
+          className="text-[27px] font-light italic text-[#7d808e] mt-1 leading-[1.2]"
           style={{ fontFamily: "'Times New Roman', Times, serif" }}
         >
-          You are the BRAND
+          Authenticity is magnetic.
         </p>
       </div>
     </FadeIn>

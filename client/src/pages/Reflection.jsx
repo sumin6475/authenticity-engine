@@ -299,7 +299,7 @@ const Reflection = () => {
         }
       </style>
       <div
-        className="relative w-full flex flex-col flex-1 overflow-hidden bg-ae-surface rounded-2xl shadow-ae-card"
+        className="relative w-full flex flex-col flex-1 overflow-hidden"
         style={{
           opacity: mounted ? 1 : 0,
           transform: mounted ? "translateY(0)" : "translateY(16px)",
@@ -334,7 +334,7 @@ const Reflection = () => {
                 {dailyPrompt || "What would you like to reflect on today?"}
               </p>
               <div
-                className="rounded-xl overflow-hidden"
+                className="rounded-xl overflow-hidden bg-ae-surface"
                 style={{
                   border: "1.5px solid transparent",
                   boxShadow: inputFocused

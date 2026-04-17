@@ -6,24 +6,30 @@ import { API_BASE } from "../utils/apiBase.js";
  */
 
 const TAG_BAR_COLORS = [
-  "#60a5fa",
-  "#34d399",
-  "#fbbf24",
-  "#f472b6",
-  "#a78bfa",
-  "#67e8f9",
-  "#fb7185",
-  "#fcd34d",
-  "#4ade80",
-  "#c084fc",
+  "#5b9fe8",
+  "#3ebe90",
+  "#e1ae4a",
+  "#da7fab",
+  "#9f82df",
+  "#60c8d8",
+  "#d97084",
+  "#dfb562",
+  "#5dbb8d",
+  "#af8ce0",
 ];
 
-const IDENTITY_GRADIENTS = [
-  "linear-gradient(to bottom right, #F7C7D9, #E888D1)",
-  "linear-gradient(to bottom right, #0B5777, #193153)",
-  "linear-gradient(to bottom right, #0DB8D3, #065B98)",
-  "linear-gradient(to bottom right, #5CA87C, #1A5140)",
+const IDENTITY_GRADIENT_PAIR = [
+  // Cool Mist + balanced: 같은 계열 안에서 은은하지만 구분되는 2가지 톤
+  "linear-gradient(to bottom right, #D9E7F6, #97BEDF)",
+  "linear-gradient(to bottom right, #C5DFE4, #78A9B7)",
 ];
+
+const GRAIN_TEXTURE_STYLE = {
+  backgroundImage:
+    "radial-gradient(rgba(255,255,255,0.24) 0.35px, transparent 0.35px), radial-gradient(rgba(0,0,0,0.18) 0.3px, transparent 0.3px)",
+  backgroundSize: "2px 2px, 2.5px 2.5px",
+  backgroundPosition: "0 0, 0.8px 0.8px",
+};
 
 function useInView(threshold = 0.2) {
   const ref = useRef(null);
@@ -96,6 +102,13 @@ function IdentityCard({ emoji, subtitle, title, gradient, delay }) {
         }}
       >
         <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            ...GRAIN_TEXTURE_STYLE,
+            opacity: 0.22,
+          }}
+        />
+        <div
           className="text-5xl leading-none"
           style={{
             transform: hovered
@@ -159,7 +172,15 @@ function TagBar({ tag, count, maxCount, colorIdx, delay }) {
         }}
         title={tag}
       >
-        <span className="truncate"># {tag}</span>
+        {/* 색상 바 위에 은은한 grain을 얹어 평면감을 줄인다. */}
+        <div
+          className="absolute inset-0 rounded-lg pointer-events-none"
+          style={{
+            ...GRAIN_TEXTURE_STYLE,
+            opacity: 0.18,
+          }}
+        />
+        <span className="truncate relative z-10"># {tag}</span>
       </div>
       <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">
         {count}
@@ -361,7 +382,7 @@ const Insight = () => {
         }
       </style>
       <div
-        className="relative w-full flex flex-col flex-1 overflow-hidden bg-ae-surface rounded-2xl shadow-ae-card"
+        className="relative w-full flex flex-col flex-1 overflow-hidden"
         style={{
           opacity: mounted ? 1 : 0,
           transform: mounted ? "translateY(0)" : "translateY(16px)",
@@ -386,7 +407,7 @@ const Insight = () => {
                     emoji={id.emoji}
                     subtitle={id.description}
                     title={id.keyword}
-                    gradient={IDENTITY_GRADIENTS[i % IDENTITY_GRADIENTS.length]}
+                    gradient={IDENTITY_GRADIENT_PAIR[i % IDENTITY_GRADIENT_PAIR.length]}
                     delay={0.25 + i * 0.1}
                   />
                 ))
@@ -398,7 +419,7 @@ const Insight = () => {
                       analysisLoading ? "Analyzing..." : "Save more captures"
                     }
                     title="?"
-                    gradient="linear-gradient(to bottom right, #e5e7eb, #d1d5db)"
+                    gradient={IDENTITY_GRADIENT_PAIR[i % IDENTITY_GRADIENT_PAIR.length]}
                     delay={0.25 + i * 0.1}
                   />
                 ))}
