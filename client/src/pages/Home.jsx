@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { API_BASE } from "../utils/apiBase.js";
 import { useNavigate } from "react-router-dom";
 
-// 요소가 화면에 들어오면 visible — 스크롤 시 순차 등장 애니메이션용
+/**
+ * Home — `GET /api/captures` (paginated), hero stats, carousel, history cards.
+ */
+
 function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -21,7 +24,6 @@ function useInView(threshold = 0.15) {
   return [ref, visible];
 }
 
-// useInView + delay로 블록마다 살짝 어긋나게 등장
 function FadeIn({ children, delay = 0, className = "" }) {
   const [ref, visible] = useInView(0.1);
   return (
@@ -39,61 +41,34 @@ function FadeIn({ children, delay = 0, className = "" }) {
   );
 }
 
-function HeroSection({ userName, captures }) {
-  const now = new Date();
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const thisWeekCaptures = captures.filter(
-    (c) => new Date(c.createdAt) > weekAgo,
-  ).length;
-
-  //첫 캡쳐기준으로 가입일 대체 (Auth 후엔 유저 정보로)
-  const oldestCapture =
-    captures.length > 0
-      ? new Date(
-          Math.min(...captures.map((c) => new Date(c.createdAt).getTime())),
-        )
-      : now;
-  const dayOfBecoming = Math.max(
-    1,
-    Math.floor((now - oldestCapture) / (1000 * 60 * 60 * 24)),
-  );
-
+function HeroSection({ userName }) {
   return (
     <FadeIn delay={0.1}>
       <div className="pt-3">
-        <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+        <h1
+          className="text-[42px] font-black text-gray-900 leading-[1.1] tracking-tight"
+          style={{
+            fontFamily:
+              "'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          }}
+        >
           {userName},
         </h1>
-        <p className="text-4xl text-gray-700 mt-1 font-serif">
+        <p
+          className="text-[26px] font-light text-[#8b8b96] mt-1 leading-[1.2] tracking-tight"
+          style={{ fontFamily: "'Times New Roman', Times, serif" }}
+        >
           You are the BRAND
         </p>
-
-        <div className="gap-8 mt-6 mb-8">
-          <div>
-            <span className="text-3xl font-bold text-gray-300">
-              {thisWeekCaptures}
-            </span>
-            <span className="text-base font-medium text-gray-900 ml-2">
-              this week
-            </span>
-          </div>
-          <div>
-            <span className="text-3xl font-bold text-gray-300">
-              {dayOfBecoming}
-            </span>
-            <span className="text-base font-medium text-gray-900 ml-2">
-              days of becoming
-            </span>
-          </div>
-        </div>
       </div>
     </FadeIn>
   );
 }
 
 const CAROUSEL_PLACEHOLDER_BGS = ["#e8e0d8", "#d4dce4", "#dce8d4", "#e4d8e8"];
+const HERO_GRADIENT =
+  "linear-gradient(160deg, #f0edf8 0%, #edf4fb 35%, #e8f5ee 65%, #fdf5e6 100%)";
 
-//not used
 function Carousel({ slides }) {
   const [active, setActive] = useState(0);
   const total = slides.length;
@@ -101,7 +76,6 @@ function Carousel({ slides }) {
   const navigate = useNavigate();
   const swiped = useRef(false);
 
-  //스와이프
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const handleTouchStart = (e) => {
@@ -112,7 +86,6 @@ function Carousel({ slides }) {
     touchEndX.current = e.changedTouches[0].clientX;
     const diff = touchEndX.current - touchStartX.current;
     const threshold = 50;
-    // 손가락을 왼쪽으로 치면 diff < 0 → 다음 슬라이드, 오른쪽이면 이전
     if (diff < -threshold) {
       swiped.current = true;
       setActive((a) => (a + 1) % total);
@@ -130,7 +103,6 @@ function Carousel({ slides }) {
       swiped.current = false;
       return;
     }
-    //웹 처리
     navigate(`/capture/${slides[safeIndex]._id}`);
   };
 
@@ -231,27 +203,10 @@ function Carousel({ slides }) {
   );
 }
 
-function FilterIcon({ icon, active, color, ariaLabel }) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      aria-pressed={active}
-      className="w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110 border-0 p-0"
-      style={{
-        background: active ? color : "#f3f4f6",
-        color: active ? "#fff" : "#aaa",
-      }}
-    >
-      {icon}
-    </button>
-  );
-}
-
 function Tag({ label }) {
   return (
     <span
-      className="text-xs px-2.5 py-1 rounded-full border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+      className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
       style={{ fontFamily: "'Pretendard', -apple-system, sans-serif" }}
     >
       # {label}
@@ -259,7 +214,6 @@ function Tag({ label }) {
   );
 }
 
-// History 리스트 한 줄 — thumbnail URL 있으면 이미지, 없으면 영역 자체 미표시
 function ContentCard({
   id,
   thumbnail,
@@ -277,19 +231,21 @@ function ContentCard({
   return (
     <FadeIn delay={delay}>
       <div
-        className="bg-white rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.06)] px-3 py-4 mb-3 overflow-hidden relative"
+        className="bg-ae-surface rounded-2xl shadow-ae-card px-4 py-4 mb-4 overflow-hidden relative"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
-          transform: hovered ? "translateY(-4px)" : "translateY(0)",
-          transition: "transform 0.2s ease",
+          transform: hovered ? "translateY(-2.5px)" : "translateY(0)",
+          transition: "transform 0.2s ease, box-shadow 0.2s ease",
+          boxShadow: hovered
+            ? "0 8px 24px rgba(0,0,0,0.08)"
+            : "0 2px 8px rgba(0,0,0,0.07)",
         }}
       >
         <article
           onClick={() => navigate(`/capture/${id}`)}
           className="cursor-pointer relative"
         >
-          {/* 썸네일 URL이 있을 때만 영역 표시 (Mongo에 thumbnail 등 필드 추가 후 연동) */}
           {isStarred && (
             <button
               type="button"
@@ -302,7 +258,7 @@ function ContentCard({
                 background: isStarred
                   ? "rgba(250,204,21,0.2)"
                   : "rgba(0,0,0,0.2)",
-                transform: isStarred ? "scale(1.1)" : "scale(1)",
+                transform: isStarred ? "scale(1.06)" : "scale(1)",
               }}
               aria-label={isStarred ? "Remove star" : "Star item"}
             >
@@ -331,7 +287,6 @@ function ContentCard({
             </div>
           )}
 
-          {/* title, description, tags, date */}
           <h3
             className={`text-[15px] font-bold leading-snug mb-1 ${isStarred && !thumbnail ? "pr-10" : ""}`}
           >
@@ -362,25 +317,19 @@ function ContentCard({
   );
 }
 
-/**
- * Home: Recently Saved 캐러셀, History 필터 + 카드 목록
- * Layout의 BottomNav·Fab 사용 — TabBar·상태바·폰 프레임·중복 FAB 제외
- */
 const Home = () => {
-  // 첫 페인트 직후 살짝 딜레이 → 카드 영역 페이드 인
   const [mounted, setMounted] = useState(false);
 
-  // 서버 캡처 목록 (캐러셀·History 공통 데이터)
   const [captures, setCaptures] = useState([]);
   const [capturesLoading, setCapturesLoading] = useState(true);
   const [capturesError, setCapturesError] = useState(null);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const pageScrollRef = useRef(null);
 
   const navigate = useNavigate();
 
-  // 마운트 시 한 번만 GET — 배포 URL은 VITE_API_BASE (없으면 localhost)
   useEffect(() => {
     let cancelled = false;
     setCapturesLoading(true);
@@ -425,6 +374,14 @@ const Home = () => {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    const rafId = requestAnimationFrame(() => {
+      // 탭 이동 시 항상 히어로부터 보이도록 스크롤을 최상단으로 맞춘다.
+      pageScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
   const loadMore = async () => {
     const nextPage = page + 1;
     try {
@@ -442,19 +399,20 @@ const Home = () => {
 
   return (
     <div
-      className="min-h-[calc(100dvh-5rem)] px-5 pb-6 w-full flex flex-col bg-white"
+      className="min-h-[calc(100dvh-5rem)] pb-6 w-full flex flex-col"
       style={{
+        background: "#f8f8f6",
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
       <style>
         {
-          "@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');"
+          "@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css'); @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap');"
         }
       </style>
       <div
-        className="relative w-full flex flex-col flex-1 overflow-hidden bg-white rounded-b-3xl shadow-soft"
+        className="relative w-full flex flex-col flex-1 overflow-hidden rounded-b-2xl"
         style={{
           opacity: mounted ? 1 : 0,
           transform: mounted ? "translateY(0)" : "translateY(16px)",
@@ -462,37 +420,59 @@ const Home = () => {
         }}
       >
         <FadeIn delay={0.1}>
-          <div className="flex justify-end pt-5 pr-5">
-            <button
-              type="button"
-              className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors mt-1 border-0 p-0"
-              aria-label="Profile"
-              onClick={() => navigate("/profile")}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden
+          <div
+            className="relative overflow-hidden rounded-b-2xl"
+            style={{ background: HERO_GRADIENT }}
+          >
+            <div className="flex justify-end pt-5 pr-4">
+              <button
+                type="button"
+                className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors mt-1 border-0 p-0"
+                aria-label="Profile"
+                onClick={() => navigate("/profile")}
               >
-                <path
-                  d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"
-                  fill="#60a5fa"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div className="flex justify-between items-start px-5 pt-5 pb-1 shrink-0 border-b border-gray-100/80">
-            <div>
-              <HeroSection userName="Sumin" captures={captures} />
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden
+                >
+                  <path
+                    d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v2h20v-2c0-3.3-6.7-5-10-5z"
+                    fill="#60a5fa"
+                  />
+                </svg>
+              </button>
             </div>
+
+            <div className="flex justify-between items-start px-4 pt-5 pb-[76px] shrink-0">
+              <div>
+                <HeroSection userName="Sumin" />
+              </div>
+            </div>
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-20"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(248,248,246,0) 0%, rgba(248,248,246,0.82) 78%, #f8f8f6 100%)",
+                filter: "blur(14px)",
+                transform: "translateY(38%)",
+              }}
+            />
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-14"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(248,248,246,0) 0%, #f8f8f6 96%)",
+              }}
+            />
           </div>
         </FadeIn>
 
         <div
-          className="flex-1 overflow-y-auto px-5 pb-4 relative"
+          ref={pageScrollRef}
+          className="flex-1 overflow-y-auto px-4 pb-4 relative"
           style={{ scrollBehavior: "smooth" }}
         >
           {capturesError && (
@@ -504,9 +484,8 @@ const Home = () => {
             </p>
           )}
 
-          {/* History 제목 + 필터 버튼 (상태 연동은 추후) */}
           <FadeIn delay={0.25}>
-            <div className="flex justify-between items-center mb-4 mt-2">
+            <div className="flex justify-between items-center mb-4">
               <div>
                 <h2 className="text-xl font-bold text-gray-900 m-0 leading-tight">
                   History
@@ -519,68 +498,21 @@ const Home = () => {
                       : `${captures.length} Items`}
                 </span>
               </div>
-              <div className="flex gap-1.5">
-                <FilterIcon
-                  active
-                  color="#facc15"
-                  ariaLabel="Starred filter"
-                  icon={
-                    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
-                      <path
-                        fill="#fff"
-                        stroke="#fff"
-                        strokeWidth="1.5"
-                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                      />
-                    </svg>
-                  }
-                />
-                <FilterIcon
-                  active
-                  color="#34d399"
-                  ariaLabel="Gallery filter"
-                  icon={
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      aria-hidden
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <path d="M3 16l5-5 4 4 3-3 6 6" />
-                    </svg>
-                  }
-                />
-                <FilterIcon
-                  active={false}
-                  color=""
-                  ariaLabel="Reflections filter"
-                  icon={
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden
-                    >
-                      <circle cx="12" cy="12" r="5" />
-                    </svg>
-                  }
-                />
-              </div>
             </div>
           </FadeIn>
 
-          {/* 전체 캡처 — Mongo는 _id */}
           {captures.map((item, i) => (
             <ContentCard
               key={item._id ?? item.id}
               id={item._id}
               title={item.title}
-              description={item.summary || item.content?.slice(0, 150) + "..."}
+              description={
+                item.type === "link"
+                  ? item.summary || ""
+                  : item.content
+                    ? `${item.content.slice(0, 150)}${item.content.length > 150 ? "..." : ""}`
+                    : ""
+              }
               tags={item.tags || []}
               date={new Date(item.createdAt).toLocaleDateString("en-US", {
                 weekday: "long",
@@ -594,12 +526,11 @@ const Home = () => {
             />
           ))}
           {hasMore && (
-            <div className="sticky bottom-0 pt-2 pb-2 bg-gradient-to-t from-white via-white to-transparent">
-              {/* 리스트 끝에서 버튼을 떠 있게 유지해서 Home만 과한 하단 공백이 생기지 않게 함 */}
+            <div className="sticky bottom-0 pt-2 pb-2 bg-gradient-to-t from-ae-surface via-ae-surface to-transparent">
               <button
                 type="button"
                 onClick={loadMore}
-                className="w-full rounded-xl border border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="w-full rounded-xl bg-ae-surface shadow-ae-card py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors border-0"
               >
                 Load more
               </button>

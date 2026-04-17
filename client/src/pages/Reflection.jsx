@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { recommended, recaps } from "../utils/dummyData";
+import { useNavigate } from "react-router-dom";
+import { recaps } from "../utils/dummyData";
 import { API_BASE } from "../utils/apiBase.js";
 
-/* ──────────────────────────────────────
-   공용 UI 컴포넌트
-   ────────────────────────────────────── */
+/**
+ * Reflection — `GET /api/insights/daily-prompt`, `memories`; recaps from `dummyData`.
+ */
 
-// 스크롤해서 보일 때 페이드 인 애니메이션 트리거
 function useInView(threshold = 0.15) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
@@ -42,16 +42,11 @@ function FadeIn({ children, delay = 0, className = "" }) {
   );
 }
 
-/* ──────────────────────────────────────
-   화면별 섹션 컴포넌트
-   ────────────────────────────────────── */
-
-// 가로 스크롤 영역 스크롤바 숨김
 const hideScrollbar =
   "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden";
 
-// 📋 Memories 캡처 카드 한 장 (서버 데이터 기반)
-function MemoryCaptureCard({ title, summary, tags, createdAt, delay }) {
+function MemoryCaptureCard({ id, title, summary, tags, createdAt, delay }) {
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const dateStr = createdAt
     ? new Date(createdAt).toLocaleDateString("en-US", {
@@ -63,16 +58,19 @@ function MemoryCaptureCard({ title, summary, tags, createdAt, delay }) {
   return (
     <FadeIn delay={delay}>
       <article
+        onClick={() => {
+          // Home 카드와 동일하게 상세 페이지로 이동한다.
+          if (id) navigate(`/capture/${id}`);
+        }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="border border-gray-100 rounded-xl p-4 mb-3 cursor-pointer"
+        className="bg-ae-surface rounded-2xl shadow-ae-card px-4 py-4 mb-4 overflow-hidden relative cursor-pointer"
         style={{
-          background: hovered ? "#f9fafb" : "#fff",
-          transform: hovered ? "translateY(-2px)" : "translateY(0)",
-          transition: "all 0.25s ease",
+          transform: hovered ? "translateY(-2.5px)" : "translateY(0)",
+          transition: "transform 0.2s ease, box-shadow 0.2s ease",
           boxShadow: hovered
-            ? "0 6px 20px rgba(0,0,0,0.06)"
-            : "0 1px 4px rgba(0,0,0,0.03)",
+            ? "0 8px 24px rgba(0,0,0,0.08)"
+            : "0 2px 8px rgba(0,0,0,0.07)",
         }}
       >
         <div className="flex justify-between items-start mb-1.5">
@@ -107,7 +105,6 @@ function MemoryCaptureCard({ title, summary, tags, createdAt, delay }) {
   );
 }
 
-// 📅 Recaps 카드 (WEEKLY 작은 카드 / MONTHLY 넓은 카드)
 function RecapCard({ type, label, accent }) {
   const [hovered, setHovered] = useState(false);
   const isMonthly = type === "MONTHLY";
@@ -120,7 +117,7 @@ function RecapCard({ type, label, accent }) {
         width: isMonthly ? 230 : 138,
         height: isMonthly ? 105 : 95,
         background: accent,
-        transform: hovered ? "translateY(-3px)" : "translateY(0)",
+        transform: hovered ? "translateY(-1.8px)" : "translateY(0)",
         transition:
           "transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease",
         boxShadow: hovered
@@ -152,7 +149,7 @@ function RecapCard({ type, label, accent }) {
               label === "January"
                 ? "rgba(59,130,246,0.15)"
                 : "rgba(244,63,94,0.2)",
-            transform: hovered ? "scale(1.05) rotate(-2deg)" : "scale(1)",
+            transform: hovered ? "scale(1.03) rotate(-1.2deg)" : "scale(1)",
             transition: "transform 0.4s ease",
           }}
         >
@@ -163,7 +160,6 @@ function RecapCard({ type, label, accent }) {
   );
 }
 
-// 🖼️ 사진 그리드 안의 썸네일 한 칸
 function PhotoThumbnail({ color, delay }) {
   const [hovered, setHovered] = useState(false);
   const [ref, visible] = useInView(0.1);
@@ -178,7 +174,7 @@ function PhotoThumbnail({ color, delay }) {
         opacity: visible ? 1 : 0,
         transform: visible
           ? hovered
-            ? "scale(1.12)"
+            ? "scale(1.07)"
             : "scale(1)"
           : "scale(0.7)",
         transition: `opacity 0.4s ease ${delay}s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1)`,
@@ -187,55 +183,6 @@ function PhotoThumbnail({ color, delay }) {
   );
 }
 
-// 📰 Recommended 카드 (Notion 등 외부 소스 추천)
-function RecommendedCard({ pillLabel, title, description }) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="rounded-2xl border border-gray-100 p-4 cursor-pointer"
-      style={{
-        background: hovered ? "#f9fafb" : "#fff",
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
-        transition: "all 0.3s ease",
-        boxShadow: hovered
-          ? "0 8px 24px rgba(0,0,0,0.06)"
-          : "0 1px 4px rgba(0,0,0,0.03)",
-      }}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <div className="flex items-center gap-1.5 bg-gray-50 rounded-full px-3 py-1.5">
-          <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
-            <rect x="3" y="3" width="18" height="18" rx="3" fill="#111" />
-            <text
-              x="12"
-              y="16.5"
-              textAnchor="middle"
-              fill="#fff"
-              fontSize="12"
-              fontWeight="bold"
-              fontFamily="serif"
-            >
-              N
-            </text>
-          </svg>
-          <span className="text-xs text-gray-500 font-medium">{pillLabel}</span>
-        </div>
-      </div>
-      <h3 className="text-lg font-bold text-gray-900 leading-snug mb-1">
-        {title}
-      </h3>
-      <p className="text-sm text-gray-400 leading-relaxed m-0">{description}</p>
-    </div>
-  );
-}
-
-/* ──────────────────────────────────────
-   설정값 / 상수 (색상·그라디언트 팔레트)
-   ────────────────────────────────────── */
-
-// Recaps 주간·월간 카드 배경
 const WEEKLY_RECAP_ACCENTS = [
   "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
   "linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%)",
@@ -247,7 +194,6 @@ const MONTHLY_RECAP_ACCENTS = [
   "linear-gradient(135deg, #fecdd3 0%, #fda4af 100%)",
 ];
 
-// 사진 그리드 썸네일 색상
 const PHOTO_THUMB_COLORS = [
   "linear-gradient(135deg, #97B3AE, #7A9A94)",
   "linear-gradient(135deg, #D2E0D3, #B5CCB7)",
@@ -259,33 +205,33 @@ const PHOTO_THUMB_COLORS = [
   "linear-gradient(135deg, #E5D4CB, #D6CBBF)",
 ];
 
-/* ──────────────────────────────────────
-   메인 페이지 컴포넌트
-   화면 위→아래 순서:
-     1) 헤더 ("Reflection" + 프로필)
-     2) Today's Prompt (질문 + 텍스트 입력)
-     3) Memories (가로 스크롤 카드)
-     4) Recommended (외부 콘텐츠 추천 카드)
-     5) Photo Highlights (사진 그리드)
-     6) Recaps (주간·월간 카드)
-   ────────────────────────────────────── */
+const PHOTO_HIGHLIGHTS_UI = {
+  heading: "Highlights from Photo Memories",
+  captionMain: "Thesedays",
+  captionSub: "December, 2025 - February, 2026",
+};
+
 const Reflection = () => {
   const [mounted, setMounted] = useState(false);
-  // Today's Prompt 입력 상태
   const [promptText, setPromptText] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
-  // 서버에서 받아온 Daily Prompt 질문
   const [dailyPrompt, setDailyPrompt] = useState("");
-  // 서버에서 받아온 Memories 목록
   const [memories, setMemories] = useState([]);
+  const pageScrollRef = useRef(null);
 
-  // 페이드 인 트리거
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(t);
   }, []);
 
-  // 마운트 시 Daily Prompt API 호출
+  useEffect(() => {
+    const rafId = requestAnimationFrame(() => {
+      // 탭 전환 직후 항상 최상단부터 보이도록 리셋한다.
+      pageScrollRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
   useEffect(() => {
     const fetchPrompt = async () => {
       try {
@@ -299,7 +245,6 @@ const Reflection = () => {
     fetchPrompt();
   }, []);
 
-  // 마운트 시 Memories API 호출
   useEffect(() => {
     const fetchMemories = async () => {
       try {
@@ -313,24 +258,37 @@ const Reflection = () => {
     fetchMemories();
   }, []);
 
-  // 더미데이터에서 Recommended / Photo Grid 항목 추출
-  const notionSource =
-    recommended.find((r) => r.type === "notion") || recommended[0];
-  const sequenceItem =
-    recommended.find((r) => r.description && !r.isPhotoGrid) || recommended[1];
-  const photoGridItem = recommended.find((r) => r.isPhotoGrid);
-
-  const photoMeta = photoGridItem?.sub
-    ? photoGridItem.sub.split("·").map((s) => s.trim())
-    : ["Thesedays", "December, 2025 - February, 2026"];
-  const photoTitle = photoMeta[0] || "Thesedays";
-  const photoSubtitle =
-    photoMeta.slice(1).join(" · ") || "December, 2025 - February, 2026";
+  const handleSend = async () => {
+    if (!promptText.trim()) return;
+    const today = new Date().toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+    try {
+      const res = await fetch(`${API_BASE}/api/captures`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: dailyPrompt || `${today} Reflection`,
+          content: promptText.trim(),
+          type: "idea",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPromptText("");
+        alert("Saved!");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div
-      className="min-h-[calc(100dvh-5rem)] px-5 pb-6 w-full flex flex-col bg-white"
+      className="min-h-[calc(100dvh-5rem)] pb-6 w-full flex flex-col"
       style={{
+        background: "#f8f8f6",
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
@@ -341,7 +299,7 @@ const Reflection = () => {
         }
       </style>
       <div
-        className="relative w-full flex flex-col flex-1 overflow-hidden bg-white rounded-b-3xl shadow-soft"
+        className="relative w-full flex flex-col flex-1 overflow-hidden bg-ae-surface rounded-2xl shadow-ae-card"
         style={{
           opacity: mounted ? 1 : 0,
           transform: mounted ? "translateY(0)" : "translateY(16px)",
@@ -349,12 +307,12 @@ const Reflection = () => {
         }}
       >
         <div
-          className="flex-1 overflow-y-auto px-5 pb-4"
+          ref={pageScrollRef}
+          className="flex-1 overflow-y-auto px-4 pb-4"
           style={{ scrollBehavior: "smooth" }}
         >
-          {/* ② Today's Prompt: 질문 텍스트 + 입력창 + 이모지·링크·전송 버튼 */}
           <FadeIn delay={0.2}>
-            <div className="mt-2 mb-6">
+            <div className="mt-2 mb-ae-section">
               <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mb-3">
                 <svg
                   width="16"
@@ -378,10 +336,10 @@ const Reflection = () => {
               <div
                 className="rounded-xl overflow-hidden"
                 style={{
-                  border: `1.5px solid ${inputFocused ? "#93c5fd" : "#e5e7eb"}`,
+                  border: "1.5px solid transparent",
                   boxShadow: inputFocused
-                    ? "0 0 0 3px rgba(147,197,253,0.2)"
-                    : "none",
+                    ? "0 0 0 3px rgba(147,197,253,0.2), var(--ae-card-shadow)"
+                    : "var(--ae-card-shadow)",
                   transition: "border-color 0.2s ease, box-shadow 0.2s ease",
                 }}
               >
@@ -461,6 +419,7 @@ const Reflection = () => {
                       transition: "background 0.25s ease",
                     }}
                     aria-label="Send"
+                    onClick={handleSend}
                   >
                     <svg
                       width="12"
@@ -483,9 +442,10 @@ const Reflection = () => {
             </div>
           </FadeIn>
 
-          {/* ③ Memories: 과거 캡처 카드 리스트 */}
           <FadeIn delay={0.3}>
-            <h2 className="text-xl font-bold text-gray-900 mb-3">Memories</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4 mt-4">
+              Memories
+            </h2>
           </FadeIn>
           {memories.length === 0 ? (
             <p className="text-sm text-gray-400 mb-5">
@@ -495,6 +455,7 @@ const Reflection = () => {
             memories.map((m, i) => (
               <MemoryCaptureCard
                 key={m._id || i}
+                id={m._id}
                 title={m.title}
                 summary={m.summary}
                 tags={m.tags}
@@ -504,75 +465,8 @@ const Reflection = () => {
             ))
           )}
 
-          {/* ④ Recommended: 외부 콘텐츠 추천 카드 */}
-          {notionSource && sequenceItem && (
-            <>
-              <FadeIn delay={0.4}>
-                <h2 className="text-xl font-bold text-gray-900 mb-3">
-                  Recommended
-                </h2>
-              </FadeIn>
-              <FadeIn delay={0.45}>
-                <RecommendedCard
-                  pillLabel={notionSource.title}
-                  title={sequenceItem.title}
-                  description={sequenceItem.description || ""}
-                />
-              </FadeIn>
-            </>
-          )}
-
-          {/* ⑤ Photo Highlights: 4×2 사진 그리드 */}
-          {photoGridItem && (
-            <FadeIn delay={0.5}>
-              <div className="mt-5 mb-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div
-                    className="w-5 h-5 rounded-full shrink-0"
-                    style={{
-                      background:
-                        "conic-gradient(#ea4335, #fbbc05, #34a853, #4285f4, #ea4335)",
-                    }}
-                  />
-                  <span className="text-sm font-medium text-gray-600">
-                    {photoGridItem.title}
-                  </span>
-                </div>
-                <div className="grid grid-cols-4 gap-1.5 mb-3">
-                  {PHOTO_THUMB_COLORS.map((c, i) => (
-                    <PhotoThumbnail key={i} color={c} delay={0.55 + i * 0.04} />
-                  ))}
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div>
-                    <div className="text-sm font-semibold text-gray-800">
-                      {photoTitle}
-                    </div>
-                    <div className="text-xs text-gray-400">{photoSubtitle}</div>
-                  </div>
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden
-                  >
-                    <path
-                      d="M9 18l6-6-6-6"
-                      stroke="#d1d5db"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </FadeIn>
-          )}
-
-          {/* ⑥ Recaps: 주간 카드 → 월간 카드 (가로 스크롤) */}
           <FadeIn delay={0.55}>
-            <h2 className="text-xl font-bold text-gray-900 mb-3 mt-1">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 mt-ae-section">
               Recaps
             </h2>
           </FadeIn>

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-//OpenAI Structured Output
+/** Zod shape for OpenAI structured output on capture labeling. */
 export const captureAiOutputSchema = z.object({
     tags: z.array(z.string().min(1).max(40)),
     category: z.string().min(1).max(80),

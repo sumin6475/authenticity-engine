@@ -1,84 +1,95 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 
-/**
- * 하단 탭 바: 플로팅 캡슐 형태
- * Home ◆ / Reflection ● / Insight ▲
- * 활성 탭은 아이콘만 연한 파란 원형 배경으로 강조
- */
+/** Floating pill tab bar: Home, Reflection, Insight. */
 const BottomNav = () => {
   return (
     <nav
-      className="fixed left-1/2 -translate-x-1/2 z-50 w-[min(280px,70vw)] rounded-full bg-white shadow-lg px-4 py-2"
+      className="fixed left-1/2 -translate-x-1/2 z-50 w-[min(320px,78vw)] rounded-full px-2 py-0"
       style={{
-        // Layout의 기준값을 그대로 사용해서 safe area + 간격을 일관되게 맞춘다.
         bottom: "calc(var(--bottom-nav-gap) + env(safe-area-inset-bottom))",
+        background: "color-mix(in srgb, var(--ae-surface) 70%, transparent)",
+        backdropFilter: "blur(40px) saturate(200%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        boxShadow: "var(--ae-card-shadow)",
       }}
     >
       <div className="flex items-center justify-around gap-1">
         <NavLink
           to="/"
           className={({ isActive }) =>
-            `flex flex-1 flex-col items-center justify-center gap-0.5 py-2 rounded-full transition-colors min-w-0 ${
-              isActive ? 'text-sky-600' : 'text-gray-500 hover:text-gray-700'
+            `flex flex-1 flex-col items-center justify-center gap-0.5 py-1 rounded-full transition-colors min-w-0 ${
+              isActive ? "text-gray-600" : "text-gray-500 hover:text-gray-700"
             }`
           }
         >
           {({ isActive }) => (
-            <>
+            <div
+              className={`w-full flex flex-col items-center justify-center rounded-full transition-colors ${
+                isActive
+                  ? "bg-white/85 backdrop-blur-md shadow-ae-card text-gray-800 py-1.5"
+                  : "text-gray-500 py-1.5"
+              }`}
+            >
               <span
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-2xl font-medium ${
-                  isActive ? 'bg-sky-100 text-sky-600' : ''
-                }`}
+                className="flex h-9 items-center justify-center rounded-full text-4xl font-medium"
                 aria-hidden="true"
               >
                 ◆
               </span>
               <span className="text-xs font-medium">Home</span>
-            </>
+            </div>
           )}
         </NavLink>
         <NavLink
           to="/reflection"
           className={({ isActive }) =>
-            `flex flex-1 flex-col items-center justify-center gap-0.5 py-2 rounded-full transition-colors min-w-0 ${
-              isActive ? 'text-sky-600' : 'text-gray-500 hover:text-gray-700'
+            `flex flex-1 flex-col items-center justify-center gap-0.5 py-1 rounded-full transition-colors min-w-0 ${
+              isActive ? "text-gray-600" : "text-gray-500 hover:text-gray-700"
             }`
           }
         >
           {({ isActive }) => (
-            <>
+            <div
+              className={`w-full flex flex-col items-center justify-center rounded-full transition-colors ${
+                isActive
+                  ? "bg-white/85 backdrop-blur-md shadow-ae-card text-gray-800 py-1.5"
+                  : "text-gray-500 py-1.5"
+              }`}
+            >
               <span
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-2xl font-medium ${
-                  isActive ? 'bg-sky-100 text-sky-600' : ''
-                }`}
+                className="flex h-9 items-center justify-center rounded-full text-3xl font-medium"
                 aria-hidden="true"
               >
                 ●
               </span>
               <span className="text-xs font-medium">Reflection</span>
-            </>
+            </div>
           )}
         </NavLink>
         <NavLink
           to="/insight"
           className={({ isActive }) =>
-            `flex flex-1 flex-col items-center justify-center gap-0.5 py-2 rounded-full transition-colors min-w-0 ${
-              isActive ? 'text-sky-600' : 'text-gray-500 hover:text-gray-700'
+            `flex flex-1 flex-col items-center justify-center gap-0.5 py-1 rounded-full transition-colors min-w-0 ${
+              isActive ? "text-gray-600" : "text-gray-500 hover:text-gray-700"
             }`
           }
         >
           {({ isActive }) => (
-            <>
+            <div
+              className={`w-full flex flex-col items-center justify-center rounded-full transition-colors ${
+                isActive
+                  ? "bg-white/85 backdrop-blur-md shadow-ae-card text-gray-800 py-1.5"
+                  : "text-gray-500 py-1.5"
+              }`}
+            >
               <span
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-2xl font-medium ${
-                  isActive ? 'bg-sky-100 text-sky-600' : ''
-                }`}
+                className="flex h-9 items-center justify-center rounded-full text-4xl font-medium"
                 aria-hidden="true"
               >
                 ▲
               </span>
               <span className="text-xs font-medium">Insight</span>
-            </>
+            </div>
           )}
         </NavLink>
       </div>

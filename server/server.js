@@ -1,4 +1,4 @@
-//Express 서버 기본 세팅
+/** Express entry: env, MongoDB, API routes. */
 import "./loadEnv.js";
 import express from "express";
 import mongoose from "mongoose";
@@ -9,14 +9,13 @@ import insightsRouter from "./routes/insights.js";
 
 const app = express();
 
-// 미들웨어 설정 — Vercel 등 외부 오리진에서 오는 요청 허용 (프리플라이트 포함)
 app.use(
   cors({
     origin: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   }),
 );
-app.use(express.json()); //JSON 형식으로 데이터 전송 허용
+app.use(express.json());
 app.use("/api/parse", parseRouter);
 
 app.get("/", (req, res) => {
@@ -28,12 +27,11 @@ app.use("/api/insights", insightsRouter);
 
 const PORT = process.env.PORT || 5000;
 
-// DB 붙기 전에 listen 하면 find()가 버퍼링됐다가 10초 타임아웃 날 수 있음 → 연결 성공 후에만 HTTP 열기
 async function start() {
   const uri = process.env.MONGODB_URI;
   if (!uri || !String(uri).trim()) {
     console.error(
-      "[FATAL] MONGODB_URI 가 비어 있습니다. Railway Variables 에 동일한 이름으로 Atlas 연결 문자열을 넣으세요.",
+      "[FATAL] MONGODB_URI is missing. Set it in Railway Variables (or .env) to your Atlas connection string.",
     );
     process.exit(1);
   }
@@ -46,7 +44,7 @@ async function start() {
   } catch (err) {
     console.error("MongoDB connection failed:", err.message);
     console.error(
-      "→ Atlas Network Access 에 0.0.0.0/0 허용, 사용자/비밀번호·클러스터 호스트가 URI 와 일치하는지 확인하세요.",
+      "→ Check Atlas Network Access (e.g. 0.0.0.0/0), credentials, and that the cluster host in the URI matches your deployment.",
     );
     process.exit(1);
   }

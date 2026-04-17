@@ -1,8 +1,5 @@
-/**
- * 정적 UI용 더미 데이터 (백엔드 연결 전)
- */
+/** Static placeholders for UI sections not yet backed by API data. */
 
-// Recently Saved 캐러셀용 (4개)
 export const recentlySaved = [
   { id: 1, title: 'Collaboration sketches', seed: 'carousel1' },
   { id: 2, title: 'Design wall', seed: 'carousel2' },
@@ -10,7 +7,6 @@ export const recentlySaved = [
   { id: 4, title: 'Project notes', seed: 'carousel4' },
 ];
 
-// History 카드 목록
 export const historyItems = [
   {
     id: 1,
@@ -39,14 +35,12 @@ export const historyItems = [
   },
 ];
 
-// Memories (Reflection 페이지)
 export const memories = [
   { id: 1, label: '1 year ago', sub: 'JAN 9, 2025', seed: 'mem1', cta: 'MORE' },
   { id: 2, label: 'Exploring', sub: 'MAY 2025 TRIP', seed: 'mem2' },
   { id: 3, label: 'Weekly recap', sub: 'FEB 2026', seed: 'mem3' },
 ];
 
-// Recommended (Reflection 페이지)
 export const recommended = [
   { id: 1, icon: 'N', title: 'Notes from Notion', type: 'notion' },
   {
@@ -64,7 +58,6 @@ export const recommended = [
   },
 ];
 
-// Recaps (Reflection 페이지)
 export const recaps = {
   weekly: [
     { id: 1, label: 'WEEKLY', month: 'Feb', range: '15 - 21' },
@@ -77,7 +70,6 @@ export const recaps = {
   ],
 };
 
-// Who You're Becoming (Insight 페이지)
 export const becomingCards = [
   {
     id: 1,
@@ -93,10 +85,8 @@ export const becomingCards = [
   },
 ];
 
-// Pattern 인용문
 export const patternQuote = 'You design your world, even in your thoughts.';
 
-// Topic/Reflection 통계 (Insight)
 export const insightStats = {
   month: 'January',
   year: '2026',

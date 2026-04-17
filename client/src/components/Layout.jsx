@@ -5,7 +5,7 @@ import BottomSheet from "./BottomSheet";
 import Capture from "../pages/Capture";
 import Fab from "./Fab";
 
-/** 공통 레이아웃: 콘텐츠 + FAB(fixed) + 하단 네비 */
+/** Tab shell: outlet, shared header for some routes, FAB + bottom nav + capture sheet. */
 const Layout = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const location = useLocation();
@@ -17,11 +17,9 @@ const Layout = () => {
   const sharedHeaderTitle = headerTitleMap[location.pathname] || "";
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen bg-[#f8f8f6]"
       style={{
-        // 상단 safe area + 기본 여백을 공통 적용해서 페이지별 시작 위치를 맞춘다.
         "--app-top-space": "calc(env(safe-area-inset-top) + 16px)",
-        // 하단 고정 UI 높이를 한 곳에서 관리해서 페이지별 겹침을 줄인다.
         "--bottom-nav-height": "80px",
         "--bottom-nav-gap": "16px",
         "--bottom-nav-safe-space":
@@ -34,9 +32,8 @@ const Layout = () => {
         style={{ paddingTop: "var(--app-top-space)" }}
       >
         {sharedHeaderTitle && (
-          <div className="px-5 mb-2">
-            {/* Reflection/Insight 공통 헤더를 Layout에서 관리해 중복 코드를 줄인다. */}
-            <div className="flex justify-between items-center pb-2 px-5 border-b border-gray-100/80">
+          <div className="mb-ae-section">
+            <div className="mx-4 mt-3 flex justify-between items-center py-4">
               <h1 className="text-3xl font-bold text-gray-900 tracking-tight m-0">
                 {sharedHeaderTitle}
               </h1>

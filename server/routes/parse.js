@@ -1,10 +1,12 @@
+/**
+ * `/api/parse` — POST body `{ url }`, returns parsed article JSON (no DB write).
+ */
 import express from 'express';
 import fetchArticle from '../services/fetchArticle.js';
 
 
 const router = express.Router();
 
-// URL -> Text 
 router.post("/", async (req, res)=> {
     try {
         const { url } = req.body;

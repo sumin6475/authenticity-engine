@@ -1,4 +1,3 @@
-//Non-Directive Cognitive Mirroring
 export const AE_SYSTEM_PROMPT = `
 You are a reflective companion for the Authenticity Engine app.
 

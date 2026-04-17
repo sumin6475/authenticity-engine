@@ -1,3 +1,6 @@
+/**
+ * `/api/insights` — who-you're-becoming (AI), daily prompt, memories, tag frequency.
+ */
 import express from "express";
 import Capture from "../models/Capture.js";
 import { AE_SYSTEM_PROMPT } from "../services/prompts.js";
@@ -7,7 +10,6 @@ import { zodTextFormat } from "openai/helpers/zod";
 
 const router = express.Router();
 
-// 지연 초기화 — 모듈 로드 시점에는 OPENAI_API_KEY가 아직 없을 수 있음
 let openaiClient = null;
 function getOpenAI() {
   if (!openaiClient) {
@@ -16,7 +18,6 @@ function getOpenAI() {
   return openaiClient;
 }
 
-// Structured Output 스키마
 const BecomingSchema = z.object({
   analysis: z.string(),
   identities: z.array(
@@ -28,7 +29,6 @@ const BecomingSchema = z.object({
   ),
 });
 
-//Who You're Becoming Insight
 router.get("/who-youre-becoming", async (req, res) => {
   try {
     const recentCaptures = await Capture.find()
@@ -77,7 +77,6 @@ router.get("/who-youre-becoming", async (req, res) => {
   }
 });
 
-//Daily Insight
 router.get("/daily-prompt", async(req,res)=>{
     try{
         const response = await getOpenAI().responses.create({
@@ -92,13 +91,11 @@ router.get("/daily-prompt", async(req,res)=>{
     }
 });
 
-//Memories
 router.get("/memories", async(req,res)=> {
     try{
-        //7일 이상된 캡쳐 중 랜덤 3개
-        const onWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const memories = await Capture.aggregate([
-            { $match: {createdAt: {$lt: onWeekAgo}}},
+            { $match: {createdAt: {$lt: oneWeekAgo}}},
             { $sample: {size: 3}},
             { $project: {title: 1, summary:1, tags: 1, createdAt: 1}}
         ]);
@@ -108,7 +105,6 @@ router.get("/memories", async(req,res)=> {
     }
 });
 
-//Tag Frequency
 router.get("/tag-frequency", async(req,res)=> {
     try{
         const result = await Capture.aggregate([

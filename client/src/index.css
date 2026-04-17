@@ -2,12 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --ae-bg: #f5f5f0;
+  --ae-surface: #ffffff;
+  --ae-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --ae-radius-card: 24px;
+  --ae-radius-inner: 14px;
+  --ae-space-card: 16px;
+  --ae-space-card-lg: 20px;
+  --ae-space-section: 24px;
+}
+
 /* 앱 컬럼 430px 가운데 정렬 */
 #root {
-  @apply max-w-mobile mx-auto min-h-screen bg-white;
+  @apply max-w-mobile mx-auto min-h-screen;
+  background: var(--ae-bg);
 }
 
 body {
   @apply m-0 antialiased text-gray-800 font-sans;
-  background: #fff;
+  background: var(--ae-bg);
 }

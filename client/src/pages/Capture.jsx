@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { API_BASE } from "../utils/apiBase.js";
 
 /**
- * Capture: "I thought about..." — Idea / URL 모드, 파싱·저장 API 연동
- * 전체 화면 라우트(하단 네비 없음) — 바텀시트 스타일 UI
+ * New capture: idea body or link — `POST /api/captures`, `POST /api/captures/from-url`.
+ * Full-screen route or embedded in `BottomSheet` (`inBottomSheet`).
  */
 const Capture = ({ onComplete, inBottomSheet = false }) => {
   const navigate = useNavigate();
@@ -75,7 +75,6 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
         const data = await response.json();
         if (data.success) {
           alert("Captured!");
-          // 바텀시트 모드에서는 시트만 닫고, 페이지 모드에서는 홈으로 이동한다.
           if (inBottomSheet) {
             onComplete?.();
           } else {
@@ -93,7 +92,6 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
         setLoading(false);
       }
     } else {
-      //URL 모드 : from-url API 호출
       if (!url.trim()) {
         alert("Please enter a URL");
         return;
@@ -111,7 +109,6 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
         const data = await response.json();
         if (data.success) {
           alert("Captured!");
-          // 바텀시트 모드에서는 시트만 닫고, 페이지 모드에서는 홈으로 이동한다.
           if (inBottomSheet) {
             onComplete?.();
           } else {
@@ -135,7 +132,7 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
     <div
       className={`${inBottomSheet ? "h-full flex flex-col" : "min-h-dvh flex flex-col max-w-mobile mx-auto"}`}
       style={{
-        background: inBottomSheet ? "#f0f0f0" : "#F1F0F6",
+        background: "#f8f8f6",
         fontFamily:
           "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
@@ -154,26 +151,24 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
           transition: "opacity 0.8s ease, transform 0.8s ease",
         }}
       >
-        {/* 전체 페이지 모드에서만 상단 딤 영역을 보여준다. */}
         {!inBottomSheet && (
           <div
             className="shrink-0"
-            style={{ background: "rgba(100,100,100,0.95)", height: 110 }}
+            style={{ background: "rgba(245,245,240,0.96)", height: 110 }}
           />
         )}
 
-        {/* 바텀시트 본문 */}
         <div
-          className={`flex-1 flex flex-col min-h-0 relative ${inBottomSheet ? "" : "rounded-t-3xl -mt-4"}`}
-          style={{ background: "#f0f0f0" }}
+          className={`flex-1 flex flex-col min-h-0 relative ${inBottomSheet ? "" : "rounded-t-2xl -mt-4"}`}
+          style={{ background: "#f8f8f6" }}
         >
-          <div className="flex justify-between items-center px-5 pt-5 pb-3 shrink-0">
+          <div className="flex justify-between items-center px-4 pt-5 pb-3 shrink-0">
             {inBottomSheet ? (
               <button
                 type="button"
                 onClick={() => onComplete?.()}
-                className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
-                style={{ background: "rgba(200,200,200,0.6)" }}
+                className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                style={{ background: "rgba(224,224,214,0.72)" }}
                 aria-label="Close"
               >
                 <svg
@@ -193,8 +188,8 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
             ) : (
               <Link
                 to="/"
-                className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
-                style={{ background: "rgba(200,200,200,0.6)" }}
+                className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                style={{ background: "rgba(224,224,214,0.72)" }}
                 aria-label="Back"
               >
                 <svg
@@ -216,7 +211,7 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
               type="button"
               onClick={handleSave}
               disabled={!canSave || loading}
-              className="w-12 h-12 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="w-12 h-12 rounded-full flex items-center justify-center border-none cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
               style={{
                 background: canSave ? "#3b82f6" : "#9ca3af",
                 boxShadow: canSave
@@ -249,8 +244,8 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
           </h1>
 
           <div
-            className="mx-6 mb-4 mt-4 flex rounded-full p-1 shrink-0"
-            style={{ background: "rgba(210,210,210,0.5)" }}
+            className="mx-5 mb-4 mt-4 grid grid-cols-2 gap-0.5 rounded-full p-0.5 shrink-0"
+            style={{ background: "#d7d9dd" }}
             role="tablist"
             aria-label="Capture mode"
           >
@@ -262,12 +257,15 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
                 setActiveMode("idea");
                 setParsedData(null);
               }}
-              className="flex-1 py-2 rounded-full border-none cursor-pointer text-sm font-semibold transition-all duration-200"
+              className="py-2.5 rounded-full border-none cursor-pointer text-sm font-semibold transition-all duration-200"
               style={{
-                background: activeMode === "idea" ? "#fff" : "transparent",
-                color: activeMode === "idea" ? "#1a1a1a" : "#888",
-                boxShadow:
-                  activeMode === "idea" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                // 선택된 탭이 '토글됨'을 즉시 인지할 수 있게 대비를 높인다.
+                background: activeMode === "idea" ? "#ffffff" : "transparent",
+                color: activeMode === "idea" ? "#1f2937" : "#6b7280",
+                boxShadow: activeMode === "idea"
+                  ? "0 2px 10px rgba(0,0,0,0.12)"
+                  : "none",
+                transform: "none",
                 fontFamily: "'Pretendard', -apple-system, sans-serif",
               }}
             >
@@ -278,12 +276,14 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
               role="tab"
               aria-selected={activeMode === "url"}
               onClick={() => setActiveMode("url")}
-              className="flex-1 py-2 rounded-full border-none cursor-pointer text-sm font-semibold transition-all duration-200"
+              className="py-2.5 rounded-full border-none cursor-pointer text-sm font-semibold transition-all duration-200"
               style={{
-                background: activeMode === "url" ? "#fff" : "transparent",
-                color: activeMode === "url" ? "#1a1a1a" : "#888",
-                boxShadow:
-                  activeMode === "url" ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+                background: activeMode === "url" ? "#ffffff" : "transparent",
+                color: activeMode === "url" ? "#1f2937" : "#6b7280",
+                boxShadow: activeMode === "url"
+                  ? "0 2px 10px rgba(0,0,0,0.12)"
+                  : "none",
+                transform: "none",
                 fontFamily: "'Pretendard', -apple-system, sans-serif",
               }}
             >
@@ -292,8 +292,7 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
           </div>
 
           <div
-            className="mx-5 flex-1 min-h-0 rounded-3xl bg-white flex flex-col overflow-hidden mb-4"
-            style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}
+            className="mx-4 flex-1 min-h-0 rounded-2xl bg-ae-surface flex flex-col overflow-hidden mb-4 shadow-ae-card"
           >
             {activeMode === "idea" ? (
               <div className="flex flex-col flex-1 min-h-0 p-5">
@@ -304,7 +303,7 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
                   onChange={(e) => setTitle(e.target.value)}
                   className="text-base font-medium text-gray-900 placeholder-gray-400 border-none outline-none bg-transparent pb-3 mb-0 shrink-0"
                   style={{
-                    borderBottom: "1px solid #eee",
+                    boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.08)",
                     fontFamily: "'Pretendard', -apple-system, sans-serif",
                   }}
                 />
@@ -322,7 +321,7 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
               <div className="flex flex-col flex-1 min-h-0 p-5 overflow-y-auto">
                 <div
                   className="flex items-center gap-2 pb-3 mb-3 shrink-0"
-                  style={{ borderBottom: "1px solid #eee" }}
+                  style={{ boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.08)" }}
                 >
                   <svg
                     width="16"
@@ -364,10 +363,10 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
                 {url.length > 0 && (
                   <div
                     className="rounded-xl p-3 mt-auto shrink-0"
-                    style={{ background: "#f8f9fa", border: "1px solid #eee" }}
+                    style={{ background: "#f8f8f5" }}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-ae-bg flex items-center justify-center shrink-0">
                         <svg
                           width="14"
                           height="14"
@@ -403,11 +402,11 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
             )}
           </div>
 
-          <div className="mx-5 mb-6 flex items-center gap-2 shrink-0">
+          <div className="mx-4 mb-6 flex items-center gap-2 shrink-0">
             <button
               type="button"
               className="flex-1 flex items-center gap-2 rounded-full px-4 py-3 cursor-pointer border-none hover:bg-gray-200/60 transition-colors text-left"
-              style={{ background: "rgba(220,220,220,0.45)" }}
+              style={{ background: "rgba(224,224,214,0.72)" }}
             >
               <svg
                 width="16"
@@ -434,7 +433,7 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
             <button
               type="button"
               className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer hover:bg-gray-200/60 transition-colors"
-              style={{ background: "rgba(220,220,220,0.45)" }}
+              style={{ background: "rgba(224,224,214,0.72)" }}
               aria-label="Add image"
             >
               <svg
@@ -458,7 +457,7 @@ const Capture = ({ onComplete, inBottomSheet = false }) => {
               onClick={handleParse}
               disabled={loading || activeMode !== "url"}
               className="w-11 h-11 rounded-full flex items-center justify-center border-none cursor-pointer hover:bg-gray-200/60 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: "rgba(220,220,220,0.45)" }}
+              style={{ background: "rgba(224,224,214,0.72)" }}
               aria-label={loading ? "Parsing URL" : "Parse URL"}
             >
               {loading ? (

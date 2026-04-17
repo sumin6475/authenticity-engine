@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 export default function BottomSheet({ isOpen, onClose, children }) {
   const [shouldRender, setShouldRender] = useState(false);
   const [visible, setVisible] = useState(false);
+  const SHEET_ANIMATION_MS = 800;
 
   useEffect(() => {
     let openRaf1;
@@ -12,8 +13,6 @@ export default function BottomSheet({ isOpen, onClose, children }) {
     if (isOpen) {
       setShouldRender(true);
       document.body.style.overflow = "hidden";
-      // 첫 프레임에 숨김 상태로 렌더한 뒤 다음 프레임에서 표시해야
-      // 열릴 때 transform transition이 안정적으로 보인다.
       setVisible(false);
       openRaf1 = requestAnimationFrame(() => {
         openRaf2 = requestAnimationFrame(() => {
@@ -22,7 +21,7 @@ export default function BottomSheet({ isOpen, onClose, children }) {
       });
     } else {
       setVisible(false);
-      closeTimer = setTimeout(() => setShouldRender(false), 320);
+      closeTimer = setTimeout(() => setShouldRender(false), SHEET_ANIMATION_MS);
       document.body.style.overflow = "unset";
     }
 
@@ -37,18 +36,19 @@ export default function BottomSheet({ isOpen, onClose, children }) {
   if (!shouldRender) return null;
   return (
     <div className="fixed inset-0 z-[60] pointer-events-none">
-      {/* 앱 컨테이너 폭(모바일 프레임) 안에서만 오버레이/시트가 보이도록 중앙 고정 */}
       <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] pointer-events-auto">
-        {/*Dim Overlay*/}
         <div
           className="absolute inset-0 bg-black/40 transition-opacity duration-450 ease-in-out"
           style={{ opacity: visible ? 1 : 0 }}
           onClick={onClose}
         />
-        {/*Bottom Sheet Content*/}
         <div
-          className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[20px] h-[min(92dvh,980px)] overflow-hidden transition-transform duration-600 ease-out"
-          style={{ transform: visible ? "translateY(0)" : "translateY(100%)" }}
+          className="absolute bottom-0 left-0 right-0 bg-ae-surface rounded-t-2xl shadow-ae-card h-[min(92dvh,980px)] overflow-hidden transition-transform transition-opacity duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{
+            transform: visible ? "translateY(0)" : "translateY(104%)",
+            opacity: visible ? 1 : 0.98,
+            willChange: "transform, opacity",
+          }}
         >
           {children}
         </div>

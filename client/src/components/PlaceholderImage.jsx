@@ -1,7 +1,4 @@
-/**
- * placeholder 이미지: 회색 박스 또는 Unsplash 랜덤
- * seed 있으면 동일 비율로 고정, 없으면 랜덤
- */
+/** Picsum placeholder; optional `seed` for stable image per card. */
 const PlaceholderImage = ({ width = 400, height = 200, seed, className = '', alt = '' }) => {
   const w = width || 400;
   const h = height || 200;
@@ -13,7 +10,7 @@ const PlaceholderImage = ({ width = 400, height = 200, seed, className = '', alt
     <img
       src={url}
       alt={alt || 'Placeholder'}
-      className={`object-cover rounded-lg bg-gray-200 ${className}`}
+      className={`object-cover rounded-xl bg-ae-bg ${className}`}
       loading="lazy"
     />
   );

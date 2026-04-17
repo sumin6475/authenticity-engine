@@ -2,7 +2,7 @@ import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 import * as cheerio from 'cheerio';
 
-/** og/twitter 메타의 이미지 URL을 페이지 기준 절대 URL로 정규화 */
+/** Resolve og/twitter image meta to an absolute URL against `pageUrl`. */
 function resolveImageUrl(pageUrl, raw) {
   if (!raw || typeof raw !== "string") return null;
   const t = raw.trim();
@@ -15,7 +15,6 @@ function resolveImageUrl(pageUrl, raw) {
 }
 
 function pickThumbnail($, pageUrl) {
-  // og:image는 스펙상 property지만, 실제로는 name="og:image"만 쓰는 사이트가 많음(MDN 등)
   const candidates = [
     $(`meta[property="og:image"]`).attr("content"),
     $(`meta[name="og:image"]`).attr("content"),
@@ -34,8 +33,8 @@ function pickThumbnail($, pageUrl) {
   return null;
 }
 
+/** Fetch HTML, extract article via Readability, pick best-effort thumbnail. */
 async function fetchArticle(url) {
-  // 일부 뉴스 사이트는 기본 Node UA를 차단함 — 브라우저에 가깝게 요청
   const response = await fetch(url, {
     headers: {
       "User-Agent":

@@ -1,3 +1,4 @@
+/** App routes: full-screen capture vs tab shell (`Layout`). */
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
@@ -11,9 +12,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Capture는 하단 네비 없이 전체 화면 */}
         <Route path="/capture" element={<Capture />} />
-        {/* 나머지는 Layout(하단 네비) — RR7은 pathless+절대자식보다 / + 상대 경로가 안정적 */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="reflection" element={<Reflection />} />

@@ -1,4 +1,6 @@
-//capture 관련 API 라우트
+/**
+ * `/api/captures` — paginated list, by id, vector similar, create capture, create from URL.
+ */
 import express from "express";
 import Capture from "../models/Capture.js";
 import fetchArticle from "../services/fetchArticle.js";
@@ -7,7 +9,6 @@ import { generateEmbedding } from "../services/embedding.js";
 
 const router = express.Router();
 
-//모든 캡쳐 가져오기 (페이지네이션 적용)
 router.get("/", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1; 
@@ -37,8 +38,9 @@ router.get("/:id", async (req, res) => {
 router.get("/similar/:id", async (req, res) => {
     try{
         const capture = await Capture.findById(req.params.id);
+        // 임베딩이 없는 캡처는 "유사 결과 없음"이므로 에러 대신 빈 배열을 반환한다.
         if(!capture || !capture.embedding.length){
-            return res.status(404).json({success: false, error: "No embedding found"});
+            return res.json({success: true, data: []});
         }
         const results = await Capture.aggregate([
             {$vectorSearch :{
@@ -62,17 +64,14 @@ router.get("/similar/:id", async (req, res) => {
     }
 });
 
-//새 캡쳐 저장하기
 router.post("/", async (req, res) => {
     try {
         const { title, content, type } = req.body;
 
-        // 스키마: idea | link 만 허용 (잘못된 값은 idea로 정규화)
         const captureType = type === "link" ? "link" : "idea";
-        // AI 분석
         let tags = [];
         let category = "";
-        let summary = ""; 
+        let summary = "";  
 
         if (content){
             const aiResult = await analyzeCaptureText(content);
@@ -99,23 +98,19 @@ router.post("/", async (req, res) => {
     }
 });
 
-// URL -> 파싱 -> AI 분석 -> 저장
 router.post("/from-url", async(req, res)=> {
     try {
         const {url, note} = req.body;
         if(!url) {
             return res.status(400).json({success: false, error: "URL is required"});
         }
-        //1. 파싱
         const article = await fetchArticle(url);
 
-        //2. AI 분석
         const aiResult = await analyzeCaptureText(article.textContent);
 
         const textForEmbedding = `${article.title} ${article.textContent}`;
         const embedding = await generateEmbedding(textForEmbedding);
 
-        //3. 저장 (thumbnail은 fetchArticle에서 og/twitter 메타 → 절대 URL)
         const capture = await Capture.create({
             title: article.title,
             content: article.textContent,
