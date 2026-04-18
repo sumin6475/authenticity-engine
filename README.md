@@ -12,6 +12,32 @@
 
 ---
 
+## ✨ Features
+
+### 🔍 Semantic Similarity Search
+
+Find past captures by **meaning**, not keywords. Search "moments I felt stuck" and surface related entries even if you never used those exact words — powered by OpenAI embeddings and MongoDB `$vectorSearch`.
+
+### 🏷️ AI-Powered Auto-Labeling
+
+Every capture is automatically processed by OpenAI Responses API with **Zod structured output** — generating tags, category, and summary without manual effort.
+
+### 🔗 URL → Article Extraction
+
+Paste any article URL; the pipeline fetches full article text and thumbnail, then runs the same label + embed flow automatically.
+
+### 💡 "Becoming" Insights
+
+Periodically retrieve recent captures → LLM generates structured snapshots of emerging themes in your thinking — answering "who am I becoming?" with your own data.
+
+### 🛡️ Production-Ready
+
+- Environment-based config for frontend (Vercel) and backend (Railway)
+- CORS handling across domains
+- MongoDB Atlas Vector Search with `vector_index` (1536 dimensions, cosine similarity)
+
+---
+
 ## Tech stack
 
 | Layer | Technologies |
