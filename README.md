@@ -4,18 +4,11 @@
 
 ---
 
-## Screenshots
+## Screenshot
 
 <p align="center">
-  <a href="./docs/readme/screenshot-home.svg" title="Home — replace with PNG when ready">
-    <img src="./docs/readme/screenshot-home.svg" alt="Home screen placeholder" width="48%" />
-  </a>
-  <a href="./docs/readme/screenshot-insight.svg" title="Insight — replace with PNG when ready">
-    <img src="./docs/readme/screenshot-insight.svg" alt="Insight screen placeholder" width="48%" />
-  </a>
+  <img src="./docs/app_img.png" alt="Authenticity Engine — marketing mockup with Insight, History, and capture flows" width="92%" />
 </p>
-
-**Using real screenshots:** Export two PNGs (e.g. ~900px wide), add them as `docs/readme/home.png` and `docs/readme/insight.png`, then in this README swap the `img src` paths to `./docs/readme/home.png` and `./docs/readme/insight.png` (and remove the placeholder SVGs if you like).
 
 ---
 
@@ -142,5 +135,5 @@ On the **`captures`** collection, create a Vector Search index named **`vector_i
 authenticity-engine/
 ├── client/          # Vite + React
 ├── server/          # Express + Mongoose + OpenAI
-└── docs/readme/     # README assets (screenshots)
+└── docs/            # e.g. app_img.png for README
 ```
