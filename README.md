@@ -32,9 +32,9 @@
 
 ## Live demo
 
-**[Open live app (Vercel)](https://example.com)** — *Replace `https://example.com` in this file with your production URL (e.g. `https://your-app.vercel.app`).*
+**[Open live app (Vercel)](https://authenticity-engine.vercel.app)**
 
-In Vercel: **Import** this repo, set **Root Directory** to `client/`, and add **`VITE_API_BASE`** (your public API origin, no trailing slash) under **Environment Variables** for Production (and Preview if you use previews).
+Set **`VITE_API_BASE`** in the Vercel project to your public API origin (no trailing slash) so the client can reach the backend.
 
 ---
 
