@@ -18,5 +18,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Cursor — local / private agent rules (public guidance lives in CLAUDE.md)
+.cursorrules
+
 Authenticity_Engine_PRD.docx
 mock-up/
+takeaway.md
