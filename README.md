@@ -14,10 +14,6 @@
 
 ## ✨ Features
 
-### 🔍 Semantic Similarity Search
-
-Find past captures by **meaning**, not keywords. Search "moments I felt stuck" and surface related entries even if you never used those exact words — powered by OpenAI embeddings and MongoDB `$vectorSearch`.
-
 ### 🏷️ AI-Powered Auto-Labeling
 
 Every capture is automatically processed by OpenAI Responses API with **Zod structured output** — generating tags, category, and summary without manual effort.
@@ -30,7 +26,7 @@ Paste any article URL; the pipeline fetches full article text and thumbnail, the
 
 Periodically retrieve recent captures → LLM generates structured snapshots of emerging themes in your thinking — answering "who am I becoming?" with your own data.
 
-### 🛡️ Production-Ready
+### 🛡️ Deploy-Ready / hosted demo
 
 - Environment-based config for frontend (Vercel) and backend (Railway)
 - CORS handling across domains
@@ -40,12 +36,12 @@ Periodically retrieve recent captures → LLM generates structured snapshots of 
 
 ## Tech stack
 
-| Layer | Technologies |
-|--------|----------------|
-| **Frontend** | React, Vite, Tailwind CSS, React Router |
-| **Backend** | Node.js, Express, Mongoose |
-| **Data** | MongoDB Atlas (documents + **Vector Search**) |
-| **AI** | OpenAI — `gpt-4o-mini`, `text-embedding-3-small`; structured output via **Responses API + Zod** |
+| Layer        | Technologies                                                                                    |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| **Frontend** | React, Vite, Tailwind CSS, React Router                                                         |
+| **Backend**  | Node.js, Express, Mongoose                                                                      |
+| **Data**     | MongoDB Atlas (documents + **Vector Search**)                                                   |
+| **AI**       | OpenAI — `gpt-4o-mini`, `text-embedding-3-small`; structured output via **Responses API + Zod** |
 
 ---
 
@@ -78,8 +74,8 @@ flowchart LR
   API --> VS
 ```
 
-- **Captures:** CRUD, URL → article text + thumbnail (`parse` / fetch pipeline), then **label + embed** and persist.  
-- **Similar notes:** `$vectorSearch` on stored embeddings (index name **`vector_index`**).  
+- **Captures:** CRUD, URL → article text + thumbnail (`parse` / fetch pipeline), then **label + embed** and persist.
+- **Similar notes:** `$vectorSearch` on stored embeddings (index name **`vector_index`**).
 - **Insights:** retrieve recent captures → LLM with project prompts → structured snapshot output.
 
 ---
@@ -150,7 +146,7 @@ On the **`captures`** collection, create a Vector Search index named **`vector_i
 
 ## Deploy notes
 
-- **Frontend (Vercel):** root for deploy is typically **`client/`**; set **`VITE_API_BASE`** to your public API URL.  
+- **Frontend (Vercel):** root for deploy is typically **`client/`**; set **`VITE_API_BASE`** to your public API URL.
 - **Backend (e.g. Railway):** set **`MONGODB_URI`**, **`OPENAI_API_KEY`**, **`PORT`**; allow CORS for your Vercel origin if needed.
 
 ---
